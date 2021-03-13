@@ -1,0 +1,68 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 5334521ee5f957678f2325c83c03bcd3c5e9c52fd6a001046b3c0f7b5859be6e
+
+name:           todo
+version:        0.1.0
+description:    Please see the README on GitHub at <https://github.com/fesanmar/todo#readme>
+homepage:       https://github.com/fesanmar/todo#readme
+bug-reports:    https://github.com/fesanmar/todo/issues
+author:         Felipe Santa-Cruz
+maintainer:     fesanmar@gmail.com
+copyright:      2021 Author name here
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/fesanmar/todo
+
+library
+  exposed-modules:
+      Todo
+  other-modules:
+      Paths_todo
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.7 && <5
+    , directory
+    , filepath
+  default-language: Haskell2010
+
+executable todo-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_todo
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , directory
+    , filepath
+    , todo
+  default-language: Haskell2010
+
+test-suite todo-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_todo
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , directory
+    , filepath
+    , todo
+  default-language: Haskell2010
