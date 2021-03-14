@@ -15,25 +15,50 @@ todoExtension = ".todo"
 
 main :: IO ()
 main = do
-    (command:fileName:args) <- getArgs
+    todoDir <- createTodoDirIfMissin
+    arguments <- getArgs
+    dispatch todoDir arguments
+    
+createTodoDirIfMissin :: IO FilePath 
+createTodoDirIfMissin = do
     todoDir <- getAppUserDataDirectory todoDirName
     existsDir <- doesDirectoryExist todoDir
     createDirectoryIfMissing existsDir todoDir
-    let todoFile = joinPath [todoDir, fileName ++ todoExtension]
-    fileExist <- doesFileExist todoFile
-    if fileExist || not fileExist && command == "new"
-    then do
-        dispatch command $ todoFile : args
-    else do
-        putStrLn $ "There is no todo list with the name " ++ "[" ++ fileName ++ "]. You should create it firs using <new> commmand"
+    return todoDir
 
-dispatch :: Command -> [String] -> IO ()
-dispatch "new" [fileName] = new fileName
-dispatch "view" [fileName] = view fileName
-dispatch "add" args@[fileName, todoItem] = add args
-dispatch "remove" args@[fileName, numberString] = remove args
-dispatch "bump" args@[fileName, numberString] = bump args
-dispatch command _ = usage
+dispatch :: FilePath -> [String] -> IO ()
+dispatch todoDir [] = usage
+dispatch todoDir ["help"] = usage
+dispatch todoDir (command:fileName:args) = 
+    let todoFile = joinPath [todoDir, fileName ++ todoExtension] in do
+    fileExists <- doesFileExist todoFile
+    if fileExists || not fileExists && command == "new"
+    then 
+        runTaskLevelCommand command $ todoFile : args
+    else
+        errorAndUsage $ "There is no to-do list with the name " ++ "[" ++ fileName ++ "]. You should create it firs using <new> commmand"
+dispatch todoDir [command] = notExistingCommandError command
+
+runTaskLevelCommand :: Command -> [String] -> IO ()
+runTaskLevelCommand "new" [fileName] = new fileName
+runTaskLevelCommand "view" [fileName] = view fileName
+runTaskLevelCommand "add" args@[fileName, todoItem] = add args
+runTaskLevelCommand "remove" args@[fileName, numberString] = remove args
+runTaskLevelCommand "bump" args@[fileName, numberString] = bump args
+runTaskLevelCommand command _ = notExistingCommandError command
+
+notExistingCommandError :: String -> IO ()
+notExistingCommandError command = errorAndUsage $ "There is no " ++ "<" ++ command ++ "> command or it's arguments doesn't match.\nPlease check usage:\n"
+
+errorAndUsage :: String -> IO ()
+errorAndUsage msg = putStrLn msg >> usage
 
 usage :: IO ()
-usage = putStrLn "Usage here"
+usage = mapM_ putStrLn [ "usage: todo <command> [<args>]\n"
+                       , "These are the todo commands:"
+                       , "    new <todoListName>                  Creates a new to-do list"
+                       , "    view <todoListName>                 Show a to-do list's tasks"
+                       , "    add <todoListName> <task>           add a new task to the passed to-do list"
+                       , "    remove <todoListName> <taskIndex>   remove the to-do list's passed task number"
+                       , "    bump <todoListName> <taskIndex>     bumps the passed task to the top of the to-do list"
+                       , "    help                                Show this usage"]
