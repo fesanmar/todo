@@ -8,6 +8,7 @@ module Todo
 
 import System.Directory (removeFile, renameFile, doesFileExist )
 import System.IO ( hClose, hPutStr, openTempFile, openFile, IOMode (WriteMode) )
+import System.FilePath ( takeDirectory )
 import Control.Exception ( bracketOnError )
 import qualified Data.List as L
 import Data.Maybe ( fromJust, isJust )
@@ -69,7 +70,8 @@ getItem stringNumber xs = getItem' =<< getNumberMaybe
           getItem' n = if n `elem` zipWith const [0..] xs then Just (xs !! n) else Nothing
 
 replaceFileContent :: FilePath -> String -> IO ()
-replaceFileContent fileName newContent = bracketOnError (openTempFile "." "temp") 
+replaceFileContent fileName newContent = let todoDir =  takeDirectory fileName in
+                                         bracketOnError (openTempFile todoDir "temp") 
                                             (\(tempName, tempHandle) -> do 
                                                 hClose tempHandle 
                                                 removeFile tempName) 

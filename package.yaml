@@ -28,7 +28,7 @@ library:
   source-dirs: src
 
 executables:
-  todo-exe:
+  todo:
     main:                Main.hs
     source-dirs:         app
     ghc-options:

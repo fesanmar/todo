@@ -8,7 +8,7 @@ import System.FilePath ( joinPath )
 type Command = String
 
 todoDirName :: String
-todoDirName = "todo"
+todoDirName = ".todo"
 
 todoExtension :: String
 todoExtension = ".todo"
@@ -25,7 +25,7 @@ main = do
     then do
         dispatch command $ todoFile : args
     else do
-        putStrLn $ "There is no todo list with the name " ++ "[" ++ fileName ++ "]. You should create it firs with"
+        putStrLn $ "There is no todo list with the name " ++ "[" ++ fileName ++ "]. You should create it firs using <new> commmand"
 
 dispatch :: Command -> [String] -> IO ()
 dispatch "new" [fileName] = new fileName
@@ -33,7 +33,7 @@ dispatch "view" [fileName] = view fileName
 dispatch "add" args@[fileName, todoItem] = add args
 dispatch "remove" args@[fileName, numberString] = remove args
 dispatch "bump" args@[fileName, numberString] = bump args
-dispatch command _ = putStrLn "" -- TODO: Print usage
+dispatch command _ = usage
 
--- usage :: IO ()
--- usage
+usage :: IO ()
+usage = putStrLn "Usage here"
