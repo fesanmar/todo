@@ -1,7 +1,7 @@
 module Todo
     ( view
     , add
-    , remove
+    , complete
     , bump
     , new
     ) where
@@ -32,8 +32,8 @@ view fileName = do
     let numberedTasks = zipWith (\n task -> show n ++ " - " ++ task) [0..] todoTasks
     mapM_ putStrLn numberedTasks
 
-remove :: [String] -> IO ()
-remove [fileName, numberString] = do
+complete :: [String] -> IO ()
+complete [fileName, numberString] = do
     items <- getTodoItems fileName
     let itemToDelete = getItem numberString items
     if isJust itemToDelete 

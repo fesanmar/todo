@@ -1,6 +1,6 @@
 module Main where
 
-import Todo ( add, bump, new, remove, view )
+import Todo ( add, bump, new, complete, view )
 import System.Environment ( getArgs )
 import System.Directory ( doesFileExist, getAppUserDataDirectory, doesDirectoryExist, createDirectoryIfMissing )
 import System.FilePath ( joinPath )
@@ -43,7 +43,7 @@ runTaskLevelCommand :: Command -> [String] -> IO ()
 runTaskLevelCommand "new" [fileName] = new fileName
 runTaskLevelCommand "view" [fileName] = view fileName
 runTaskLevelCommand "add" args@[fileName, todoItem] = add args
-runTaskLevelCommand "remove" args@[fileName, numberString] = remove args
+runTaskLevelCommand "complete" args@[fileName, numberString] = complete args
 runTaskLevelCommand "bump" args@[fileName, numberString] = bump args
 runTaskLevelCommand command _ = notExistingCommandError command
 
@@ -59,6 +59,6 @@ usage = mapM_ putStrLn [ "usage: todo <command> [<args>]\n"
                        , "    new <todoListName>                  Creates a new to-do list"
                        , "    view <todoListName>                 Show a to-do list's tasks"
                        , "    add <todoListName> <task>           add a new task to the passed to-do list"
-                       , "    remove <todoListName> <taskIndex>   remove the to-do list's passed task number"
+                       , "    complete <todoListName> <taskIndex> complete the to-do list's passed task number"
                        , "    bump <todoListName> <taskIndex>     bumps the passed task to the top of the to-do list"
                        , "    help                                Show this usage"]
