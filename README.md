@@ -12,7 +12,7 @@ usage: todo <command> [<args>]
 These are the todo commands:
     new <todoListName>                  Creates a new to-do list
     view <todoListName>                 Show a to-do list's tasks
-    add <todoListName> <task>           add a new task to the passed to-do list
+    add [-b] <todoListName> <task>      append a new task to the passed to-do list or prepend it if [-b] is setted.
     complete <todoListName> <taskIndex> complete the to-do list's passed task number
     bump <todoListName> <taskIndex>     bumps the passed task to the top of the to-do list
     help                                Show this usage
