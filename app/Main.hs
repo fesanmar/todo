@@ -1,6 +1,6 @@
 module Main where
 
-import Todo ( todoExtension, add, bump, new, complete, view )
+import Todo ( todoExtension, append, prepend, bump, new, complete, view )
 import System.Environment ( getArgs )
 import System.Directory ( doesFileExist, getAppUserDataDirectory, doesDirectoryExist, createDirectoryIfMissing )
 import System.FilePath ( joinPath )
@@ -26,23 +26,30 @@ createTodoDirIfMissin = do
 dispatch :: FilePath -> [String] -> IO ()
 dispatch todoDir [] = usage
 dispatch todoDir ["help"] = usage
-dispatch todoDir (command:fileName:args) = 
-    let todoFile = joinPath [todoDir, fileName ++ todoExtension] in do
-    fileExists <- doesFileExist todoFile
+dispatch todoDir (command:"-b":fileName:args) = dispatch todoDir (command : fileName : "-b" : args)
+dispatch todoDir (command:fileName:args) = do
+    (todoFile, fileExists) <- listExistsOnDir todoDir fileName
     if fileExists || not fileExists && command == "new"
     then 
-        runTaskLevelCommand command $ todoFile : args
+        runCommand command $ todoFile : args
     else
         errorAndUsage $ "There is no to-do list with the name " ++ "[" ++ fileName ++ "]. You should create it firs using <new> commmand"
 dispatch todoDir [command] = notExistingCommandError command
 
-runTaskLevelCommand :: Command -> [String] -> IO ()
-runTaskLevelCommand "new" [fileName] = new fileName
-runTaskLevelCommand "view" [fileName] = view fileName
-runTaskLevelCommand "add" args@[fileName, todoItem] = add args
-runTaskLevelCommand "complete" args@[fileName, numberString] = complete args
-runTaskLevelCommand "bump" args@[fileName, numberString] = bump args
-runTaskLevelCommand command _ = notExistingCommandError command
+listExistsOnDir :: FilePath -> FilePath -> IO (FilePath, Bool)
+listExistsOnDir todoDir fileName =
+    let todoFile = joinPath [todoDir, fileName ++ todoExtension] in do
+    fileExists <- doesFileExist todoFile
+    return (todoFile, fileExists)
+
+runCommand :: Command -> [String] -> IO ()
+runCommand "new" [fileName] = new fileName
+runCommand "view" [fileName] = view fileName
+runCommand "add" [fileName, "-b", todoItem] = prepend fileName todoItem
+runCommand "add" [fileName, todoItem] = append fileName todoItem
+runCommand "complete" args@[fileName, numberString] = complete args
+runCommand "bump" args@[fileName, numberString] = bump args
+runCommand command _ = notExistingCommandError command
 
 notExistingCommandError :: String -> IO ()
 notExistingCommandError command = errorAndUsage $ "There is no " ++ "<" ++ command ++ "> command or it's arguments doesn't match.\nPlease check usage:\n"

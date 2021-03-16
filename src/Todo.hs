@@ -2,7 +2,8 @@
 module Todo
     ( todoExtension
     , view
-    , add
+    , append
+    , prepend
     , complete
     , bump
     , new
@@ -20,6 +21,7 @@ import qualified Data.Text as T
 todoExtension :: String
 todoExtension = ".todo"
 
+extensionLen :: Int
 extensionLen = length todoExtension
 
 new :: FilePath -> IO ()
@@ -31,8 +33,19 @@ new fileName = do
         handle <- openFile fileName WriteMode
         hClose handle
 
-add :: [String] -> IO ()
-add [fileName, todoItem] = appendFile fileName $ todoItem ++ "\n" 
+append :: FilePath -> String -> IO ()
+append fileName todoItem = appendFile fileName $ todoItem ++ "\n" 
+
+prepend :: FilePath -> String -> IO ()
+prepend fileName todoItem = 
+    append fileName todoItem 
+    >> lastIndex fileName
+    >>= \index -> bump [fileName, show index]
+
+lastIndex :: FilePath -> IO Int
+lastIndex fileName = 
+    getTodoItems fileName 
+    >>= \list -> return $ length list - 1
 
 view :: String -> IO ()
 view fileName = do
