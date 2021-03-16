@@ -1,5 +1,7 @@
+{-# LANGUAGE OverloadedStrings #-}
 module Todo
-    ( view
+    ( todoExtension
+    , view
     , add
     , complete
     , bump
@@ -8,11 +10,17 @@ module Todo
 
 import System.Directory (removeFile, renameFile, doesFileExist )
 import System.IO ( hClose, hPutStr, openTempFile, openFile, IOMode (WriteMode) )
-import System.FilePath ( takeDirectory )
+import System.FilePath ( takeDirectory, takeFileName )
 import Control.Exception ( bracketOnError )
 import qualified Data.List as L
 import Data.Maybe ( fromJust, isJust )
 import Data.Char ( isDigit )
+import qualified Data.Text as T
+
+todoExtension :: String
+todoExtension = ".todo"
+
+extensionLen = length todoExtension
 
 new :: FilePath -> IO ()
 new fileName = do
@@ -29,8 +37,16 @@ add [fileName, todoItem] = appendFile fileName $ todoItem ++ "\n"
 view :: String -> IO ()
 view fileName = do
     todoTasks <- getTodoItems fileName
-    let numberedTasks = zipWith (\n task -> show n ++ " - " ++ task) [0..] todoTasks
-    mapM_ putStrLn numberedTasks
+    let isEmpty = null todoTasks || all (T.null . T.strip . T.pack ) todoTasks
+    if isEmpty then putStrLn $ nameFromPath fileName ++ " is empty."
+    else printListedTask todoTasks
+
+printListedTask :: [String] -> IO ()
+printListedTask todoTasks = let numberedTasks = zipWith (\n task -> show n ++ " - " ++ task) [0..] todoTasks in
+                            mapM_ putStrLn numberedTasks
+
+nameFromPath :: FilePath -> String 
+nameFromPath fileName = T.unpack . T.dropEnd extensionLen $ T.pack $ takeFileName fileName
 
 complete :: [String] -> IO ()
 complete [fileName, numberString] = do

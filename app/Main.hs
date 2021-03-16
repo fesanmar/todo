@@ -1,6 +1,6 @@
 module Main where
 
-import Todo ( add, bump, new, complete, view )
+import Todo ( todoExtension, add, bump, new, complete, view )
 import System.Environment ( getArgs )
 import System.Directory ( doesFileExist, getAppUserDataDirectory, doesDirectoryExist, createDirectoryIfMissing )
 import System.FilePath ( joinPath )
@@ -9,9 +9,6 @@ type Command = String
 
 todoDirName :: String
 todoDirName = ".todo"
-
-todoExtension :: String
-todoExtension = ".todo"
 
 main :: IO ()
 main = do
