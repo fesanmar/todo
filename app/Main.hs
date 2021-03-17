@@ -1,6 +1,7 @@
 module Main where
 
-import Todo ( todoExtension, append, prepend, bump, new, complete, view )
+import Todo.Task ( append, prepend, bump, complete, view )
+import Todo.List ( todoExtension, new, viewTodos )
 import System.Environment ( getArgs )
 import System.Directory ( doesFileExist, getAppUserDataDirectory, doesDirectoryExist, createDirectoryIfMissing )
 import System.FilePath ( joinPath )
@@ -26,6 +27,7 @@ createTodoDirIfMissin = do
 dispatch :: FilePath -> [String] -> IO ()
 dispatch todoDir [] = usage
 dispatch todoDir ["help"] = usage
+dispatch todoDir ["ls"] = viewTodos todoDir
 dispatch todoDir (command:"-b":fileName:args) = dispatch todoDir (command : fileName : "-b" : args)
 dispatch todoDir (command:fileName:args) = do
     (todoFile, fileExists) <- listExistsOnDir todoDir fileName

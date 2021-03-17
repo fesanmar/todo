@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9c9eaaaa5d2eb3c121cc8a2182033972627871fdd234196440fcd563a992648f
+-- hash: fefe3a694b689a1ae15aba9c3cf43a6f746bafd38ce5b5f1643f6d40fb6a2ea7
 
 name:           todo
 version:        0.1.0
@@ -27,7 +27,8 @@ source-repository head
 
 library
   exposed-modules:
-      Todo
+      Todo.List
+      Todo.Task
   other-modules:
       Paths_todo
   hs-source-dirs:
