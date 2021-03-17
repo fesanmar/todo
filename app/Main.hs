@@ -1,10 +1,13 @@
 module Main where
 
-import Todo.Task ( append, prepend, bump, complete, view )
-import Todo.List ( todoExtension, new, remove, rename, viewTodos )
+import Todo.Task ( append, bump, complete, prepend, view )
+import Todo.List ( new, remove, rename, todoFilePath, viewTodos )
 import System.Environment ( getArgs )
-import System.Directory ( doesFileExist, getAppUserDataDirectory, doesDirectoryExist, createDirectoryIfMissing )
-import System.FilePath ( joinPath )
+import System.Directory
+    ( createDirectoryIfMissing,
+      doesDirectoryExist,
+      doesFileExist,
+      getAppUserDataDirectory ) 
 
 type Command = String
 
@@ -40,12 +43,9 @@ dispatch todoDir [command] = notExistingCommandError command
 
 listExistsOnDir :: FilePath -> FilePath -> IO (FilePath, Bool)
 listExistsOnDir todoDir fileName =
-    let todoFile = joinPath [todoDir, fileName ++ todoExtension] in do
+    let todoFile = todoFilePath todoDir fileName in do
     fileExists <- doesFileExist todoFile
     return (todoFile, fileExists)
-
-todoFile :: FilePath -> FilePath -> FilePath
-todoFile todoDir fileName = joinPath [todoDir, fileName ++ todoExtension]
 
 runCommand :: Command -> [String] -> IO ()
 runCommand "new" [fileName] = new fileName
