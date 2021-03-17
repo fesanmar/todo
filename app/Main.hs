@@ -1,7 +1,7 @@
 module Main where
 
 import Todo.Task ( append, prepend, bump, complete, view )
-import Todo.List ( todoExtension, new, remove, viewTodos )
+import Todo.List ( todoExtension, new, remove, rename, viewTodos )
 import System.Environment ( getArgs )
 import System.Directory ( doesFileExist, getAppUserDataDirectory, doesDirectoryExist, createDirectoryIfMissing )
 import System.FilePath ( joinPath )
@@ -44,9 +44,13 @@ listExistsOnDir todoDir fileName =
     fileExists <- doesFileExist todoFile
     return (todoFile, fileExists)
 
+todoFile :: FilePath -> FilePath -> FilePath
+todoFile todoDir fileName = joinPath [todoDir, fileName ++ todoExtension]
+
 runCommand :: Command -> [String] -> IO ()
 runCommand "new" [fileName] = new fileName
 runCommand "remove" [fileName] = remove fileName
+runCommand "rename" [fileName, newFileName] = rename fileName newFileName
 runCommand "view" [fileName] = view fileName
 runCommand "add" [fileName, "-b", todoItem] = prepend fileName todoItem
 runCommand "add" [fileName, todoItem] = append fileName todoItem
@@ -66,6 +70,7 @@ usage = mapM_ putStrLn [ "usage: todo <command> [<args>]\n"
                        , "    ls                                  Shows user's to-do lists"
                        , "    new <todoListName>                  Creates a new to-do list"
                        , "    remove <todoListName>               removes a existing to-do list"
+                       , "    rename <todoListName> <newName>     renames a existing to-do list"
                        , "    view <todoListName>                 Shows a to-do list's tasks"
                        , "    add [-b] <todoListName> <task>      append a new task to the passed to-do list or prepend it if [-b] is setted."
                        , "    complete <todoListName> <taskIndex> complete the to-do list's passed task number"
