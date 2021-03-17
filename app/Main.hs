@@ -1,7 +1,7 @@
 module Main where
 
 import Todo.Task ( append, prepend, bump, complete, view )
-import Todo.List ( todoExtension, new, viewTodos )
+import Todo.List ( todoExtension, new, remove, viewTodos )
 import System.Environment ( getArgs )
 import System.Directory ( doesFileExist, getAppUserDataDirectory, doesDirectoryExist, createDirectoryIfMissing )
 import System.FilePath ( joinPath )
@@ -35,7 +35,7 @@ dispatch todoDir (command:fileName:args) = do
     then 
         runCommand command $ todoFile : args
     else
-        errorAndUsage $ "There is no to-do list with the name " ++ "[" ++ fileName ++ "]. You should create it firs using <new> commmand"
+        putStrLn $ "There is no to-do list with the name " ++ "[" ++ fileName ++ "]. You should create it firs using <new> commmand"
 dispatch todoDir [command] = notExistingCommandError command
 
 listExistsOnDir :: FilePath -> FilePath -> IO (FilePath, Bool)
@@ -46,6 +46,7 @@ listExistsOnDir todoDir fileName =
 
 runCommand :: Command -> [String] -> IO ()
 runCommand "new" [fileName] = new fileName
+runCommand "remove" [fileName] = remove fileName
 runCommand "view" [fileName] = view fileName
 runCommand "add" [fileName, "-b", todoItem] = prepend fileName todoItem
 runCommand "add" [fileName, todoItem] = append fileName todoItem
@@ -62,8 +63,10 @@ errorAndUsage msg = putStrLn msg >> usage
 usage :: IO ()
 usage = mapM_ putStrLn [ "usage: todo <command> [<args>]\n"
                        , "These are the todo commands:"
+                       , "    ls                                  Shows user's to-do lists"
                        , "    new <todoListName>                  Creates a new to-do list"
-                       , "    view <todoListName>                 Show a to-do list's tasks"
+                       , "    remove <todoListName>               removes a existing to-do list"
+                       , "    view <todoListName>                 Shows a to-do list's tasks"
                        , "    add [-b] <todoListName> <task>      append a new task to the passed to-do list or prepend it if [-b] is setted."
                        , "    complete <todoListName> <taskIndex> complete the to-do list's passed task number"
                        , "    bump <todoListName> <taskIndex>     bumps the passed task to the top of the to-do list"
