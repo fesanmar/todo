@@ -1,6 +1,6 @@
 module Main where
 
-import Todo.Task ( append, bump, complete, prepend, view )
+import Todo.Task ( append, bump, dropTask, complete, prepend, view )
 import Todo.List ( new, remove, rename, todoFilePath, viewTodos )
 import System.Environment ( getArgs )
 import System.Directory
@@ -56,6 +56,7 @@ runCommand "add" [fileName, "-b", todoItem] = prepend fileName todoItem
 runCommand "add" [fileName, todoItem] = append fileName todoItem
 runCommand "complete" args@[fileName, numberString] = complete args
 runCommand "bump" args@[fileName, numberString] = bump args
+runCommand "drop" args@[fileName, numberString] = dropTask args
 runCommand command _ = notExistingCommandError command
 
 notExistingCommandError :: String -> IO ()
@@ -75,4 +76,5 @@ usage = mapM_ putStrLn [ "usage: todo <command> [<args>]\n"
                        , "    add [-b] <todoListName> <task>      append a new task to the passed to-do list or prepend it if [-b] is setted."
                        , "    complete <todoListName> <taskIndex> complete the to-do list's passed task number"
                        , "    bump <todoListName> <taskIndex>     bumps the passed task to the top of the to-do list"
+                       , "    drop <todoListName> <taskIndex>     drops the passed task to the bottom of the to-do list"
                        , "    help                                Show this usage"]
