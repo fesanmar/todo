@@ -5,6 +5,7 @@ module Todo.Task
     , prepend
     , complete
     , up
+    , down
     , bump
     , dropTask
     ) where
@@ -57,6 +58,10 @@ complete [fileName, numberString] = do
 
 putErrorLn :: Show a => a -> IO ()
 putErrorLn numberString = putStrLn $ show numberString ++ " is out of bound or is not a number!"
+
+down :: Int -> Int -> [TodoTask] -> [TodoTask]
+down index steps items = reverse . up reverseIndex steps $ reverse items
+    where reverseIndex = length items - index - 1
 
 up :: Int -> Int -> [TodoTask] -> [TodoTask]
 up index steps items
