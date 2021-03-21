@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: fefe3a694b689a1ae15aba9c3cf43a6f746bafd38ce5b5f1643f6d40fb6a2ea7
+-- hash: 50c73234e6748a54851bdfca780fe1c473733cb78b70f79ae62af8da7588c071
 
 name:           todo
 version:        0.1.0
@@ -66,5 +66,6 @@ test-suite todo-test
       base >=4.7 && <5
     , directory
     , filepath
+    , hspec
     , todo
   default-language: Haskell2010

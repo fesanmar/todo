@@ -4,6 +4,7 @@ module Todo.Task
     , append
     , prepend
     , complete
+    , up
     , bump
     , dropTask
     ) where
@@ -11,11 +12,11 @@ module Todo.Task
 import           Control.Exception (bracketOnError)
 import           Data.Char         (isDigit)
 import qualified Data.List         as L
-import           Data.Maybe        (fromJust, isJust)
+import           Data.Maybe        (fromJust, isJust, isNothing)
 import qualified Data.Text         as T
 import           System.Directory  (removeFile, renameFile)
 import           System.FilePath   (takeDirectory, takeFileName)
-import           System.IO         (hClose, hPutStr, openTempFile)
+import           System.IO         (hClose, hPutStr, openTempFile, stderr)
 import           Todo.List         (nameFromPath)
 
 type TodoTask = String
@@ -56,6 +57,14 @@ complete [fileName, numberString] = do
 
 putErrorLn :: Show a => a -> IO ()
 putErrorLn numberString = putStrLn $ show numberString ++ " is out of bound or is not a number!"
+
+up :: Int -> Int -> [TodoTask] -> [TodoTask]
+up index steps items
+    | steps <= 0 || index <= 0 || index >= length items= items
+    | otherwise = up prev (steps -1) oneStepUpList
+    where oneStepUpList = take prev items ++ (items !! index) : items !! prev : drop next items
+          prev = index - 1
+          next = index + 1
 
 bump :: [String] -> IO ()
 bump [fileName, numberString] =
