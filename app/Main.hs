@@ -55,7 +55,8 @@ runCommand "view" [fileName] = view fileName
 runCommand "add" [fileName, "-b", todoItem] = prepend fileName todoItem
 runCommand "add" [fileName, todoItem] = append fileName todoItem
 runCommand "complete" args@[fileName, numberString] = complete args
-runCommand "bump" args@[fileName, numberString] = bump args
+runCommand "bump" args@[fileName, numberString] = bump fileName numberString Nothing 
+runCommand "bump" args@[fileName, numberString, stepsStr] = bump fileName numberString (Just stepsStr) 
 runCommand "drop" args@[fileName, numberString] = dropTask args
 runCommand command _ = notExistingCommandError command
 

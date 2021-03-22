@@ -22,6 +22,10 @@ import           Todo.List         (nameFromPath)
 
 type TodoTask = String
 type NumberString = String
+data TodoConversion = TodoConversion
+  { onError :: IO (),
+    onSuccess :: Maybe ([TodoTask] -> TodoTask -> String)
+  }
 
 append :: FilePath -> String -> IO ()
 append fileName todoItem = appendFile fileName $ todoItem ++ "\n"
@@ -30,7 +34,7 @@ prepend :: FilePath -> String -> IO ()
 prepend fileName todoItem =
     append fileName todoItem
     >> lastIndex fileName
-    >>= \index -> bump [fileName, show index]
+    >>= \index -> bump fileName (show index) Nothing 
 
 lastIndex :: FilePath -> IO Int
 lastIndex fileName = getTodoItems fileName >>= \list -> return $ length list - 1
@@ -71,29 +75,35 @@ up index steps items
           prev = index - 1
           next = index + 1
 
-bump :: [String] -> IO ()
-bump [fileName, numberString] =
-  bracketOnItemExists
-    fileName
-    numberString
-    (putErrorLn numberString)
-    (\items itemToBump -> unlines $ itemToBump : L.delete itemToBump items)
+bump :: FilePath -> NumberString -> Maybe NumberString -> IO ()
+bump fileName indexStr maybeSteps = let accurateFuncs = accurateTodoConv indexStr maybeSteps in
+    bracketOnItemExists fileName indexStr (onError accurateFuncs) (onSuccess accurateFuncs)
+
+
+accurateTodoConv :: NumberString -> Maybe NumberString -> TodoConversion
+accurateTodoConv indexStr maybeSteps
+  | isNothing maybeSteps = TodoConversion (putErrorLn indexStr) $ Just (\items itemToBump -> unlines $ itemToBump : L.delete itemToBump items)
+  | isJust maybeSteps =
+    let stepsStr = fromJust maybeSteps
+     in if all isDigit stepsStr
+          then TodoConversion (putErrorLn indexStr) $ Just (\items _ -> unlines $ up (read indexStr) (read stepsStr) items)
+          else TodoConversion (putErrorLn "steps") Nothing
 
 dropTask :: [String] -> IO ()
 dropTask [fileName, numberString] =
   bracketOnItemExists
     fileName
     numberString
-    (putErrorLn numberString)
-    (\items itemToDrop -> unlines $ L.delete itemToDrop items ++ [itemToDrop])
+    (putErrorLn numberString) $
+    Just (\items itemToDrop -> unlines $ L.delete itemToDrop items ++ [itemToDrop])
 
-bracketOnItemExists :: FilePath -> NumberString -> IO () -> ([TodoTask] -> TodoTask -> String) -> IO ()
+bracketOnItemExists :: FilePath -> NumberString -> IO () -> Maybe ([TodoTask] -> TodoTask -> String) -> IO ()
 bracketOnItemExists fileName numberString ioError fSuccess = do
   items <- getTodoItems fileName
   let itemMaybe = getItem numberString items
-  if isJust itemMaybe
+  if isJust itemMaybe && isJust fSuccess
     then let itemToOp = fromJust itemMaybe
-          in replaceFileContent fileName $ fSuccess items itemToOp
+          in replaceFileContent fileName $ fromJust fSuccess items itemToOp
     else ioError
 
 getTodoItems :: FilePath -> IO [TodoTask]
