@@ -9,7 +9,7 @@ module Todo.Task
 where
 
 import qualified Data.List as L
-import Data.Maybe ( fromJust, isJust )
+import Data.Maybe (fromJust, isJust)
 import qualified Data.Text as T
 import Todo.List (nameFromPath)
 import Todo.Transaction
