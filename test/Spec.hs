@@ -1,6 +1,6 @@
 import Test.Hspec        (Spec, it, shouldBe)
 import Test.Hspec.Runner (configFastFail, defaultConfig, hspecWith)
-import Todo.Task ( up, down )
+import Todo.Transaction (up, down)
 
 main :: IO ()
 main = hspecWith defaultConfig {configFastFail = True} specs
