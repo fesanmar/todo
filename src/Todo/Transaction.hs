@@ -1,10 +1,9 @@
 module Todo.Transaction
-    ( up
-    , down
+    ( lastIndex
     , getTodoItems
     , getItem
     , replaceFileContent
-    , putErrorLn
+    , outOfBoundError
     , scroll
     , Direction (Up, Down)
     , TodoTask
@@ -18,6 +17,8 @@ import System.FilePath ( takeDirectory )
 import Control.Exception ( bracketOnError )
 import System.IO ( hClose, hPutStr, openTempFile )
 import System.Directory ( removeFile, renameFile )
+import Util.ScrollList ( up, down )
+import Util.Console ( putErrorLn )
 
 type TodoTask = String
 
@@ -32,8 +33,12 @@ data TodoConverter = TodoConverter
 
 data Direction = Down | Up
 
-putErrorLn :: Show a => a -> IO ()
-putErrorLn numberString = putStrLn $ show numberString ++ " is out of bound or is not a number!"
+outOfBoundError :: NumberString -> IO ()
+outOfBoundError numberString = 
+  putErrorLn $ show numberString ++ " is out of bound or is not a number!"
+
+lastIndex :: FilePath -> IO Int
+lastIndex fileName = getTodoItems fileName >>= \list -> return $ length list - 1
 
 scroll :: FilePath -> Direction -> NumberString -> Maybe NumberString -> IO ()
 scroll fileName dir indexStr maybeSteps =
@@ -41,29 +46,15 @@ scroll fileName dir indexStr maybeSteps =
         Up -> (up, \items itemToBump -> unlines $ itemToBump : L.delete itemToBump items)
         Down -> (down, \items itemToDrop -> unlines $ L.delete itemToDrop items ++ [itemToDrop])
       accurateFuncs = case maybeSteps of
-        Nothing -> TodoConverter (putErrorLn indexStr) $ Just noStepsConvF
+        Nothing -> TodoConverter (outOfBoundError indexStr) $ Just noStepsConvF
         Just steps -> accurateTodoConv stepsConvF indexStr steps
    in bracketOnItemExists fileName indexStr (onError accurateFuncs) (onSuccess accurateFuncs)
-
-up :: Int -> Int -> [TodoTask] -> [TodoTask]
-up index steps items
-  | steps <= 0 || index <= 0 || index >= length items = items
-  | otherwise = up prev (steps -1) oneStepUpList
-  where
-    oneStepUpList = take prev items ++ (items !! index) : items !! prev : drop next items
-    prev = index - 1
-    next = index + 1
-
-down :: Int -> Int -> [TodoTask] -> [TodoTask]
-down index steps items = reverse . up reverseIndex steps $ reverse items
-  where
-    reverseIndex = length items - index - 1
 
 accurateTodoConv :: ListRefactor -> NumberString -> NumberString -> TodoConverter
 accurateTodoConv f indexStr stepsStr =
   if all isDigit stepsStr
-    then TodoConverter (putErrorLn indexStr) $ Just (\items _ -> unlines $ f (read indexStr) (read stepsStr) items)
-    else TodoConverter (putErrorLn "steps") Nothing
+    then TodoConverter (outOfBoundError indexStr) $ Just (\items _ -> unlines $ f (read indexStr) (read stepsStr) items)
+    else TodoConverter (outOfBoundError "steps") Nothing
 
 bracketOnItemExists :: FilePath -> NumberString -> IO () -> Maybe ([TodoTask] -> TodoTask -> String) -> IO ()
 bracketOnItemExists fileName numberString ioError fSuccess = do

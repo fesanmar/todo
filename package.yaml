@@ -28,6 +28,7 @@ library:
   source-dirs: src
   dependencies:
   - text
+  - ansi-terminal
 
 executables:
   todo:

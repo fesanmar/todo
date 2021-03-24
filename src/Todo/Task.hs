@@ -15,7 +15,8 @@ import Todo.List (nameFromPath)
 import Todo.Transaction
     ( NumberString,
       TodoTask,
-      putErrorLn,
+      outOfBoundError,
+      lastIndex,
       getTodoItems,
       getItem,
       replaceFileContent,
@@ -30,9 +31,6 @@ prepend fileName todoItem =
   append fileName todoItem
     >> lastIndex fileName
     >>= \index -> bump fileName (show index) Nothing
-
-lastIndex :: FilePath -> IO Int
-lastIndex fileName = getTodoItems fileName >>= \list -> return $ length list - 1
 
 view :: String -> IO ()
 view fileName = do
@@ -53,7 +51,7 @@ complete [fileName, numberString] = do
   let itemToDelete = getItem numberString items
   if isJust itemToDelete
     then replaceFileContent fileName (unlines $ L.delete (fromJust itemToDelete) items)
-    else putErrorLn numberString
+    else outOfBoundError numberString
 
 bump :: FilePath -> NumberString -> Maybe NumberString -> IO ()
 bump fileName = scroll fileName Up

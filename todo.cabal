@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d3e7bb706d76f129f2039da532b0a3336a3cf536e6fd6f5b59506c94a3c53c17
+-- hash: 2e691f0fbdd66b4be6f0de0b11629feb75c910c61c212064fe32ebbe685ea7a5
 
 name:           todo
 version:        0.1.0
@@ -30,12 +30,15 @@ library
       Todo.List
       Todo.Task
       Todo.Transaction
+      Util.Console
+      Util.ScrollList
   other-modules:
       Paths_todo
   hs-source-dirs:
       src
   build-depends:
-      base >=4.7 && <5
+      ansi-terminal
+    , base >=4.7 && <5
     , directory
     , filepath
     , text

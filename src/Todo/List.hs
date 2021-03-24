@@ -13,6 +13,7 @@ import System.IO ( hClose, hPutStr, openTempFile, openFile, IOMode (WriteMode) )
 import System.FilePath
     ( joinPath, isExtensionOf, takeDirectory, takeFileName )
 import qualified Data.Text as T
+import Util.Console ( putErrorLn )
 
 todoExtension :: String
 todoExtension = ".todo"
@@ -30,7 +31,7 @@ new fileName = do
         hClose handle
 
 alreadyExistsListError :: FilePath -> IO ()
-alreadyExistsListError fileName = putStrLn $ "Already exist a to-do list with the name " ++ "[" ++ fileName ++ "]"
+alreadyExistsListError fileName = putErrorLn $ "Already exist a to-do list with the name " ++ "[" ++ fileName ++ "]"
 
 remove :: FilePath  -> IO ()
 remove = removeFile 

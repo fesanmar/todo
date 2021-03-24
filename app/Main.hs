@@ -7,6 +7,7 @@ import System.Directory
     getAppUserDataDirectory,
   )
 import System.Environment (getArgs)
+import Util.Console ( putErrorLn )
 import Todo.List (new, remove, rename, todoFilePath, viewTodos)
 import Todo.Task (append, bump, complete, dropTask, prepend, view)
 
@@ -17,12 +18,12 @@ todoDirName = ".todo"
 
 main :: IO ()
 main = do
-  todoDir <- createTodoDirIfMissin
+  todoDir <- createTodoDirIfMissing
   arguments <- getArgs
   dispatch todoDir arguments
 
-createTodoDirIfMissin :: IO FilePath
-createTodoDirIfMissin = do
+createTodoDirIfMissing :: IO FilePath
+createTodoDirIfMissing = do
   todoDir <- getAppUserDataDirectory todoDirName
   existsDir <- doesDirectoryExist todoDir
   createDirectoryIfMissing existsDir todoDir
@@ -43,9 +44,8 @@ dispatch todoDir [command] = notExistingCommandError command
 listExistsOnDir :: FilePath -> FilePath -> IO (FilePath, Bool)
 listExistsOnDir todoDir fileName =
   let todoFile = todoFilePath todoDir fileName
-   in do
-        fileExists <- doesFileExist todoFile
-        return (todoFile, fileExists)
+   in doesFileExist todoFile
+      >>= \fileExists -> return (todoFile, fileExists)
 
 runCommand :: Command -> [String] -> IO ()
 runCommand "new" [fileName] = new fileName
@@ -65,7 +65,7 @@ notExistingCommandError :: String -> IO ()
 notExistingCommandError command = errorAndUsage $ "There is no " ++ "<" ++ command ++ "> command or it's arguments doesn't match.\nPlease check usage:\n"
 
 errorAndUsage :: String -> IO ()
-errorAndUsage msg = putStrLn msg >> usage
+errorAndUsage msg = putErrorLn msg >> usage
 
 usage :: IO ()
 usage =
