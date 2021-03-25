@@ -8,7 +8,8 @@ import System.Directory
   )
 import System.Environment ( getArgs )
 import Util.Console ( putErrorLn )
-import Todo.List (new, remove, rename, todoFilePath, viewTodos)
+import Config ( loadConfig, Config(path) )
+import Todo.List ( new, remove, rename, todoFilePath, viewTodos )
 import Todo.Task ( append, bump, complete, dropTask, prepend, view )
 
 type Command = String
@@ -18,24 +19,18 @@ todoDirName = ".todo"
 
 main :: IO ()
 main = do
-  todoDir <- createTodoDirIfMissing
-  arguments <- getArgs
-  dispatch todoDir arguments
-
-createTodoDirIfMissing :: IO FilePath
-createTodoDirIfMissing = do
   todoDir <- getAppUserDataDirectory todoDirName
-  existsDir <- doesDirectoryExist todoDir
-  createDirectoryIfMissing existsDir todoDir
-  return todoDir
+  config <- loadConfig todoDir
+  arguments <- getArgs
+  dispatch config arguments
 
-dispatch :: FilePath -> [String] -> IO ()
-dispatch todoDir [] = usage
-dispatch todoDir ["help"] = usage
-dispatch todoDir ["ls"] = viewTodos todoDir
-dispatch todoDir (command : "-b" : fileName : args) = dispatch todoDir (command : fileName : "-b" : args)
-dispatch todoDir (command : fileName : args) = do
-  (todoFile, fileExists) <- listExistsOnDir todoDir fileName
+dispatch :: Config  -> [String] -> IO ()
+dispatch config [] = usage
+dispatch config ["help"] = usage
+dispatch config ["ls"] = viewTodos (path config)
+dispatch config (command : "-b" : fileName : args) = dispatch config (command : fileName : "-b" : args)
+dispatch config (command : fileName : args) = do
+  (todoFile, fileExists) <- listExistsOnDir (path config) fileName
   if fileExists || not fileExists && command == "new"
     then runCommand command $ todoFile : args
     else putStrLn $ "There is no to-do list with the name " ++ "[" ++ fileName ++ "]. You should create it firs using <new> commmand"

@@ -92,24 +92,24 @@ specs = do
     
     -- Config
     it "Loading config creates .todo dir inside base path" $ do
-     config <- loadConfig baseDirName 
+     config <- loadConfig basePath 
      path config `shouldBe` basePath 
      cleanUpDir
     
     it "Loading config set ini.todo file" $ do
-     config <- loadConfig baseDirName 
+     config <- loadConfig basePath 
      configFilePath config `shouldBe` iniFilePath
      cleanUpDir
     
     it "Loading config default todo list as Nothing if todo.ini doesn't exists" $ do
-     config <- loadConfig baseDirName 
+     config <- loadConfig basePath
      cleanUpDir
      defaultList config `shouldBe` Nothing 
     
     it "Reseting default to-do list, saving config and reloading it" $ do
-     config <- loadConfig baseDirName 
-     let modifiedConfig = newDefaultList (joinPath [basePath, "work.todo"]) config
+     config <- loadConfig basePath 
+     let modifiedConfig = newDefaultList (joinPath [basePath, "work"]) config
      dumpConfig modifiedConfig
-     newLoadedConfig <- loadConfig baseDirName 
+     newLoadedConfig <- loadConfig basePath 
      newLoadedConfig `shouldBe` modifiedConfig
      cleanUpDir

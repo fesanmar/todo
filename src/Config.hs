@@ -16,15 +16,12 @@ import qualified Data.ByteString.UTF8 as BUT
 
 data Config = Config { path :: FilePath
                      , configFilePath :: FilePath
-                     , defaultList :: Maybe FilePath
+                     , defaultList :: Maybe String
                      } deriving ( Eq )
 
 instance Show Config where
   show config = if isJust defaultTodo then "defaultList=" ++ fromJust defaultTodo ++ "\n" else ""
     where defaultTodo = defaultList config
-
-todoDirName :: FilePath
-todoDirName = ".todo"
 
 configFilename :: FilePath
 configFilename = "todo.ini"
@@ -40,7 +37,7 @@ loadConfig basePath = do
     return $ Config appPath iniFilePath defaultLst 
 
 createTodoDirIfMissing :: FilePath -> IO FilePath
-createTodoDirIfMissing basePath = let todoDir = joinPath [basePath, todoDirName] in
+createTodoDirIfMissing todoDir =
   doesDirectoryExist todoDir
   >>= \existsDir -> createDirectoryIfMissing existsDir todoDir
   >> return todoDir
