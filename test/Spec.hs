@@ -1,9 +1,30 @@
-import Test.Hspec        (Spec, it, shouldBe)
+import Test.Hspec        (Spec, it, shouldBe, runIO)
 import Test.Hspec.Runner (configFastFail, defaultConfig, hspecWith)
 import Util.ScrollList (up, down)
+import Config
+import System.FilePath
+import System.Directory
+
+toThree :: [String]
+toThree = ["one", "two", "three"]
+
+toTen :: [String]
+toTen = toThree ++ ["four", "five", "six", "seven", "eight", "nine", "ten"]
+
+baseDirName :: FilePath
+baseDirName = joinPath [".", "test", "res"]
+
+basePath :: FilePath
+basePath = joinPath [baseDirName, ".todo"]
+
+iniFilePath :: FilePath
+iniFilePath = joinPath [basePath, "todo.ini"]
+
+cleanUpDir :: IO ()
+cleanUpDir = removePathForcibly basePath
 
 main :: IO ()
-main = hspecWith defaultConfig {configFastFail = True} specs
+main =  hspecWith defaultConfig {configFastFail = True} specs
 
 specs :: Spec
 specs = do
@@ -68,11 +89,27 @@ specs = do
 
     it "Move task three positions down in a longer list" $
      down 5 3 toTen `shouldBe` ["one", "two", "three", "four", "five", "seven", "eight", "nine", "six", "ten"]
-
     
-
-toThree :: [String]
-toThree = ["one", "two", "three"]
-
-toTen :: [String]
-toTen = toThree ++ ["four", "five", "six", "seven", "eight", "nine", "ten"]
+    -- Config
+    it "Loading config creates .todo dir inside base path" $ do
+     config <- loadConfig baseDirName 
+     path config `shouldBe` basePath 
+     cleanUpDir
+    
+    it "Loading config set ini.todo file" $ do
+     config <- loadConfig baseDirName 
+     configFilePath config `shouldBe` iniFilePath
+     cleanUpDir
+    
+    it "Loading config default todo list as Nothing if todo.ini doesn't exists" $ do
+     config <- loadConfig baseDirName 
+     cleanUpDir
+     defaultList config `shouldBe` Nothing 
+    
+    it "Reseting default to-do list, saving config and reloading it" $ do
+     config <- loadConfig baseDirName 
+     let modifiedConfig = newDefaultList (joinPath [basePath, "work.todo"]) config
+     dumpConfig modifiedConfig
+     newLoadedConfig <- loadConfig baseDirName 
+     newLoadedConfig `shouldBe` modifiedConfig
+     cleanUpDir

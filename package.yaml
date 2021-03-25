@@ -29,6 +29,9 @@ library:
   dependencies:
   - text
   - ansi-terminal
+  - bytestring
+  - utf8-string
+  - extra
 
 executables:
   todo:

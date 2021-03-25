@@ -6,10 +6,10 @@ import System.Directory
     doesFileExist,
     getAppUserDataDirectory,
   )
-import System.Environment (getArgs)
+import System.Environment ( getArgs )
 import Util.Console ( putErrorLn )
 import Todo.List (new, remove, rename, todoFilePath, viewTodos)
-import Todo.Task (append, bump, complete, dropTask, prepend, view)
+import Todo.Task ( append, bump, complete, dropTask, prepend, view )
 
 type Command = String
 

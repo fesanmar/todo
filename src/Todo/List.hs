@@ -8,7 +8,7 @@ module Todo.List
     , viewTodos
     ) where
 
-import System.Directory (removeFile, renameFile, doesFileExist, listDirectory )
+import System.Directory ( removeFile, renameFile, doesFileExist, listDirectory )
 import System.IO ( hClose, hPutStr, openTempFile, openFile, IOMode (WriteMode) )
 import System.FilePath
     ( joinPath, isExtensionOf, takeDirectory, takeFileName )
