@@ -13,6 +13,8 @@ usage: todo <command> [<args>]\n,
           new <todoListName>                        Creates a new to-do list.
           remove <todoListName>                     removes a existing to-do list.
           rename <todoListName> <newName>           renames a existing to-do list.
+          dl <todoListName>                         Sets <todoListName> as the default list, so '--' can be 
+                                                    used instead of the list name in the others commands.
           view <todoListName>                       Shows a to-do list's tasks.
           add [-b] <todoListName> <task>            append a new task to the passed to-do list or prepend it
                                                     if [-b] is setted.

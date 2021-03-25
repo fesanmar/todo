@@ -14,6 +14,7 @@ import qualified Data.Text as T
 import qualified Data.ByteString as Str
 import qualified Data.ByteString.UTF8 as BUT
 
+-- |Holds the app configuration data.
 data Config = Config { path :: FilePath
                      , configFilePath :: FilePath
                      , defaultList :: Maybe String
@@ -26,6 +27,10 @@ instance Show Config where
 configFilename :: FilePath
 configFilename = "todo.ini"
 
+{-|
+  Loads default configuration if 'todo.ini' doesn't exists yet or its empty.
+  Otherwise, the todo.ini file is loaded as 'Config' and retured. 
+-}
 loadConfig :: FilePath -> IO Config
 loadConfig basePath = do
     appPath <- createTodoDirIfMissing basePath
@@ -58,8 +63,10 @@ extractKVPairs = createPairs . removeNoKeyValuePairs . removeSections . removeCo
         removeNoKeyValuePairs = filter ("=" `T.isInfixOf`)
         createPairs = map (both (T.unpack . T.strip) . second (T.drop 1) . T.break (== '='))
 
+-- |Dumps 'Config' into 'todo.ini' file.
 dumpConfig :: Config -> IO ()
 dumpConfig config = Str.writeFile (configFilePath config) (BUT.fromString $ show config)
 
-newDefaultList :: FilePath -> Config -> Config
+-- |Returns a 'Config' with a new to-do list as default.
+newDefaultList :: String -> Config -> Config
 newDefaultList newTodo (Config pth cf _)  = Config pth cf $ Just newTodo
