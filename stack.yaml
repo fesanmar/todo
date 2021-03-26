@@ -31,6 +31,10 @@ resolver:
 #   - wai
 packages:
 - .
+
+extra-deps:
+  - https://hackage.haskell.org/package/scroll-list-1.0.0.0/scroll-list-1.0.0.0.tar.gz
+
 # Dependency packages to be pulled from upstream that are not in the resolver.
 # These entries can reference officially published versions as well as
 # forks / in-progress versions pinned to a git hash. For example:

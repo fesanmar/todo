@@ -3,7 +3,18 @@
 # For more information, please see the documentation at:
 #   https://docs.haskellstack.org/en/stable/lock_files
 
-packages: []
+packages:
+- completed:
+    size: 3055
+    url: https://hackage.haskell.org/package/scroll-list-1.0.0.0/scroll-list-1.0.0.0.tar.gz
+    name: scroll-list
+    version: 1.0.0.0
+    sha256: c3f7a30ec098d86760653c043224ace54a5b5c8a0aaa414d47ff429187daf0ef
+    pantry-tree:
+      size: 371
+      sha256: a6e085ef810b60905f2d4976069d5ee64d3ed9ff37305fb770f34f83df86f590
+  original:
+    url: https://hackage.haskell.org/package/scroll-list-1.0.0.0/scroll-list-1.0.0.0.tar.gz
 snapshots:
 - completed:
     size: 565266

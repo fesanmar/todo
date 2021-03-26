@@ -17,7 +17,7 @@ import System.FilePath ( takeDirectory )
 import Control.Exception ( bracketOnError )
 import System.IO ( hClose, hPutStr, openTempFile )
 import System.Directory ( removeFile, renameFile )
-import Util.ScrollList ( up, down )
+import Data.List.Scroll ( down, up )
 import Util.Console ( putErrorLn )
 
 type TodoTask = String

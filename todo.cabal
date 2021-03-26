@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 38ff3279bbaf4aabc7c115a14a7fcdda76f0c94cd1a58533fa19c8a5aeed3a63
+-- hash: 102ead70952ce8e16d97e1dc38a7f112d50a8bac7e37984e1df5b793970174d8
 
 name:           todo
 version:        0.1.0
@@ -32,7 +32,6 @@ library
       Todo.Task
       Todo.Transaction
       Util.Console
-      Util.ScrollList
   other-modules:
       Paths_todo
   hs-source-dirs:
@@ -44,6 +43,7 @@ library
     , directory
     , extra
     , filepath
+    , scroll-list
     , text
     , utf8-string
   default-language: Haskell2010
