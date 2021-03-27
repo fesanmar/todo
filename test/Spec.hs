@@ -39,7 +39,7 @@ specs = do
      cleanUpDir
      defaultList config `shouldBe` Nothing 
     
-    it "Reseting default to-do list, saving config and reloading it" $ do
+    it "Seting default to-do list, saving config and reloading it" $ do
      config <- loadConfig basePath 
      let modifiedConfig = newDefaultList (joinPath [basePath, "work"]) config
      dumpConfig modifiedConfig

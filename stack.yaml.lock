@@ -5,16 +5,16 @@
 
 packages:
 - completed:
-    size: 3055
-    url: https://hackage.haskell.org/package/scroll-list-1.0.0.0/scroll-list-1.0.0.0.tar.gz
+    size: 3110
+    url: https://hackage.haskell.org/package/scroll-list-1.0.0.1/scroll-list-1.0.0.1.tar.gz
     name: scroll-list
-    version: 1.0.0.0
-    sha256: c3f7a30ec098d86760653c043224ace54a5b5c8a0aaa414d47ff429187daf0ef
+    version: 1.0.0.1
+    sha256: 83fb6c9c70943e5a3ec074023f0c9d5648589afae491bf0c4f7fba290958e4e3
     pantry-tree:
-      size: 371
-      sha256: a6e085ef810b60905f2d4976069d5ee64d3ed9ff37305fb770f34f83df86f590
+      size: 372
+      sha256: 0fb8e05b1ab9931aee1b13f0b864a5e82273790f70d40938f7a159471140cfea
   original:
-    url: https://hackage.haskell.org/package/scroll-list-1.0.0.0/scroll-list-1.0.0.0.tar.gz
+    url: https://hackage.haskell.org/package/scroll-list-1.0.0.1/scroll-list-1.0.0.1.tar.gz
 snapshots:
 - completed:
     size: 565266

@@ -52,7 +52,7 @@ iniContent iniFile =
   doesFileExist iniFile
     >>= \exists ->
       if exists
-        then Str.readFile iniFile >>= \content -> return content
+        then Str.readFile iniFile
         else return ""
 
 extractKVPairs :: Str.ByteString -> [(String, String)]
