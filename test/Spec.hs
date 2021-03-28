@@ -41,8 +41,19 @@ specs = do
     
     it "Seting default to-do list, saving config and reloading it" $ do
      config <- loadConfig basePath 
-     let modifiedConfig = newDefaultList (joinPath [basePath, "work"]) config
+     let modifiedConfig = newDefaultList "work" config
      dumpConfig modifiedConfig
      newLoadedConfig <- loadConfig basePath 
      newLoadedConfig `shouldBe` modifiedConfig
      cleanUpDir
+
+    it "Casting empty config to list" $ do
+     config <- loadConfig basePath
+     cleanUpDir
+     configToList config `shouldBe` []
+
+    it "Casting a not empty config to list" $ do
+     config <- loadConfig basePath
+     cleanUpDir
+     let modifiedConfig = newDefaultList "work" config
+     configToList modifiedConfig `shouldBe` ["defaultList=work"]

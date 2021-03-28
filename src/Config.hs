@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Config 
     ( loadConfig
+    , configToList
     , Config (path, configFilePath, defaultList)
     , dumpConfig
     , newDefaultList ) where
@@ -35,9 +36,8 @@ loadConfig :: FilePath -> IO Config
 loadConfig basePath = do
     appPath <- createTodoDirIfMissing basePath
     let iniFilePath = joinPath [appPath, configFilename]
-    configContentMaybe <- iniContent iniFilePath
-    config <- iniContent iniFilePath
-    let configPairs = extractKVPairs config
+    ini <- iniContent iniFilePath
+    let configPairs = extractKVPairs ini
         defaultLst = lookup "defaultList" configPairs
     return $ Config appPath iniFilePath defaultLst 
 
@@ -62,6 +62,10 @@ extractKVPairs = createPairs . removeNoKeyValuePairs . removeSections . removeCo
         removeSections = filter (not . T.isPrefixOf "[")
         removeNoKeyValuePairs = filter ("=" `T.isInfixOf`)
         createPairs = map (both (T.unpack . T.strip) . second (T.drop 1) . T.break (== '='))
+
+-- |Returns the configuration in the form of a list of strings with the format key=value
+configToList :: Config -> [String]
+configToList = map T.unpack . T.lines . T.strip . T.pack . show
 
 -- |Dumps 'Config' into 'todo.ini' file.
 dumpConfig :: Config -> IO ()

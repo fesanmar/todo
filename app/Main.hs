@@ -7,10 +7,12 @@ import System.Directory
     getAppUserDataDirectory,
   )
 import System.Environment ( getArgs )
+import Control.Monad ( when )
 import Util.Console ( putErrorLn )
 import Config
     ( dumpConfig,
       loadConfig,
+      configToList,
       newDefaultList,
       Config(defaultList, path) )
 import Todo.List ( new, remove, rename, todoFilePath, viewTodos )
@@ -32,6 +34,10 @@ dispatch :: Config  -> [String] -> IO ()
 dispatch config [] = usage
 dispatch config ["help"] = usage
 dispatch config ["ls"] = viewTodos (path config)
+dispatch config ["config"] =
+  let configLst = configToList config
+   in mapM_ putStrLn configLst
+        >> when (null configLst) (putStrLn "Any configuration setted yet.")
 dispatch config ["dl", fileName] = do
   (_, fileExists) <- listExistsOnDir (path config) fileName
   if fileExists 
@@ -88,6 +94,7 @@ usage =
     putStrLn
     [ "usage: todo <command> [<args>]\n",
       "These are the todo commands:",
+      "    config                                Shows user's configuration",
       "    ls                                    Shows user's to-do lists",
       "    new <listName>                        Creates a new to-do list",
       "    remove <listName>                     removes a existing to-do list",

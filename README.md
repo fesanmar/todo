@@ -9,6 +9,7 @@ As a CLI application, just open a terminal and type any valid command to run it.
 ``` cmd
 usage: todo <command> [<args>]\n,
       These are the todo commands:
+          config                                    Shows user's configuration
           ls                                        Shows user's to-do lists.
           new <todoListName>                        Creates a new to-do list.
           remove <todoListName>                     removes a existing to-do list.
