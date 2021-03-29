@@ -1,9 +1,9 @@
 module Main where
-
-import Command.Distapcher ( dispatch )
+  
 import System.Directory ( getAppUserDataDirectory )
 import Config ( loadConfig )
 import System.Directory.Internal.Prelude ( getArgs )
+import Command.Dispatcher ( dispatch )
 
 todoDirName :: String
 todoDirName = ".todo"

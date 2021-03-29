@@ -1,12 +1,12 @@
 module Todo.List 
-    ( todoFilePath
-    , extensionLen
-    , nameFromPath
-    , new
+    ( new
     , remove
     , rename
     , viewTodos
+    , nameFromPath
     , listExistsOnDir
+    , notTodoListToShowMsg
+    , alreadyExistsListError
     ) where
 
 import System.Directory ( removeFile, renameFile, doesFileExist, listDirectory )
@@ -15,6 +15,7 @@ import System.FilePath
     ( joinPath, isExtensionOf, takeDirectory, takeFileName )
 import qualified Data.Text as T
 import Util.Console ( putErrorLn )
+import Control.Monad ( when )
 
 todoExtension :: String
 todoExtension = ".todo"
@@ -51,6 +52,10 @@ viewTodos todoDir = do
     dirContent <- listDirectory todoDir
     let todos = map nameFromPath . filter (todoExtension `isExtensionOf`) $ dirContent
     mapM_ putStrLn todos
+    when (null todos) notTodoListToShowMsg
+
+notTodoListToShowMsg :: IO ()
+notTodoListToShowMsg = putStrLn "Not to-do list to show yet. Create one using <new> command."
 
 listExistsOnDir :: FilePath -> FilePath -> IO (FilePath, Bool)
 listExistsOnDir todoDir "" = return ("", False)
