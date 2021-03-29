@@ -6,6 +6,7 @@ module Todo.List
     , remove
     , rename
     , viewTodos
+    , listExistsOnDir
     ) where
 
 import System.Directory ( removeFile, renameFile, doesFileExist, listDirectory )
@@ -50,6 +51,13 @@ viewTodos todoDir = do
     dirContent <- listDirectory todoDir
     let todos = map nameFromPath . filter (todoExtension `isExtensionOf`) $ dirContent
     mapM_ putStrLn todos
+
+listExistsOnDir :: FilePath -> FilePath -> IO (FilePath, Bool)
+listExistsOnDir todoDir "" = return ("", False)
+listExistsOnDir todoDir fileName =
+  let todoFile = todoFilePath todoDir fileName
+   in doesFileExist todoFile
+      >>= \fileExists -> return (todoFile, fileExists)
 
 nameFromPath :: FilePath -> String 
 nameFromPath fileName = T.unpack . T.dropEnd extensionLen $ T.pack $ takeFileName fileName
