@@ -16,6 +16,7 @@ import Command.Dispatcher.Internal
 
 type Command = String
 
+-- |Dispatch a command with the passed configuration and arguments.
 dispatch :: Config -> [String] -> IO ()
 dispatch config [] = usage
 dispatch config args@(command:other)

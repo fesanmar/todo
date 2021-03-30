@@ -13,6 +13,7 @@ import System.IO ( hClose, hPutStr, openTempFile, openFile, IOMode (WriteMode) )
 import System.FilePath
     ( joinPath, isExtensionOf, takeDirectory, takeFileName )
 import qualified Data.Text as T
+import Control.Monad ( when )
 import Util.Console ( putErrorLn )
 import Control.Monad ( when )
 import Todo.List.Internal (alreadyExistsListError)
@@ -23,6 +24,10 @@ todoExtension = ".todo"
 extensionLen :: Int
 extensionLen = length todoExtension
 
+{-|
+  Creates a new to-do list if not exist. Otherwise, 
+  displays an error message.
+-}
 new :: FilePath -> IO ()
 new fileName = do
     fileExist <- doesFileExist fileName
@@ -32,8 +37,14 @@ new fileName = do
         handle <- openFile fileName WriteMode
         hClose handle
 
+{-|
+  Removes a to-do list if exist. Otherwise, 'remove'
+  does nothing.
+-}
 remove :: FilePath  -> IO ()
-remove = removeFile 
+remove file = do
+    exist <- doesFileExist file
+    when exist $ removeFile file
 
 rename :: FilePath -> FilePath -> IO ()
 rename todoFile newName= do

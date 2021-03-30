@@ -70,7 +70,7 @@ specs = do
      let modifiedConfig = newDefaultList "work" config
      configToList modifiedConfig `shouldBe` ["defaultList=work"]
     
-    -- To-do list level operations
+    -- List
 
     it "Creating a new to-do list" $ do
      config <- loadTestConfig
@@ -84,12 +84,28 @@ specs = do
      config <- loadTestConfig
      let todoLst = joinPath [path config, "work.todo"]
      new todoLst
-     (ouput, _) <- capture $ new todoLst
+     (output, _) <- capture $ new todoLst
      (outputError, _) <- capture $ alreadyExistsListError "work"
      cleanUpDir
-     ouput `shouldBe` outputError
+     output `shouldBe` outputError
     
-    -- Dispatch
+    it "Removing a not existing to-do list" $ do
+     config <- loadTestConfig
+     let todoLst = joinPath [path config, "work.todo"]
+     (output, _) <- capture $ remove todoLst
+     output `shouldBe` ""
+     cleanUpDir
+    
+    it "Removing an existing to-do list" $ do
+     config <- loadTestConfig
+     let todoLst = joinPath [path config, "work.todo"]
+     new todoLst
+     remove todoLst
+     exist <- doesFileExist todoLst
+     exist `shouldBe` False
+     cleanUpDir
+    
+    -- Dispatcher
     
     it "Dispatching help command" $ do
      config <- configAndCleanUpDir
