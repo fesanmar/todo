@@ -1,4 +1,4 @@
-module Todo.List 
+module Todo.List
     ( new
     , remove
     , rename
@@ -15,8 +15,8 @@ import System.FilePath
 import qualified Data.Text as T
 import Control.Monad ( when )
 import Util.Console ( putErrorLn )
-import Control.Monad ( when )
 import Todo.List.Internal (alreadyExistsListError)
+import Todo.FileHandling (onFileExist)
 
 todoExtension :: String
 todoExtension = ".todo"
@@ -42,12 +42,17 @@ new fileName = do
   does nothing.
 -}
 remove :: FilePath  -> IO ()
-remove file = do
-    exist <- doesFileExist file
-    when exist $ removeFile file
+remove file = onFileExist file $ removeFile file
 
-rename :: FilePath -> FilePath -> IO ()
-rename todoFile newName= do
+{-|
+  Renames a to-do list if exist and if the other name doesn't belong
+  to another existing to-do list.
+  If the list to rename doesn't exist, 'rename' does nothing. If
+  the wanted new name belongs to another list, 'rename' prints an
+  error message.
+-}
+rename :: FilePath -> String -> IO ()
+rename todoFile newName= onFileExist todoFile $ do
     let todoPath = takeDirectory todoFile
     let newTodoFile  = joinPath [todoPath, newName ++ todoExtension]
     doesExists <- doesFileExist newTodoFile
@@ -72,7 +77,7 @@ listExistsOnDir todoDir fileName =
    in doesFileExist todoFile
       >>= \fileExists -> return (todoFile, fileExists)
 
-nameFromPath :: FilePath -> String 
+nameFromPath :: FilePath -> String
 nameFromPath fileName = T.unpack . T.dropEnd extensionLen $ T.pack $ takeFileName fileName
 
 todoFilePath :: FilePath -> FilePath -> FilePath

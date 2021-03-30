@@ -105,6 +105,36 @@ specs = do
      exist `shouldBe` False
      cleanUpDir
     
+    it "Renaming an existing to-do list with a not existing to-do list" $ do
+     config <- loadTestConfig
+     let todoLst = joinPath [path config, "work.todo"]
+         otherName = joinPath [path config, "job.todo"]
+     new todoLst
+     rename todoLst "job"
+     existOriginal <- doesFileExist todoLst
+     existRenamed <- doesFileExist otherName
+     (existOriginal, existRenamed) `shouldBe` (False, True)
+     cleanUpDir
+    
+    it "Renaming a not existing to-do list" $ do
+     config <- loadTestConfig
+     let todoLst = joinPath [path config, "work.todo"]
+     (output, _) <- capture $ rename todoLst "job"
+     output `shouldBe` ""
+     cleanUpDir
+    
+    it "Renaming an existing to-do list with another existing to-do list" $ do
+     config <- loadTestConfig
+     let todoLst = joinPath [path config, "work.todo"]
+         otherName = "home"
+         otherLst = joinPath [path config, otherName ++ ".todo"]
+     new todoLst
+     new otherLst
+     (output, _) <- capture $ rename todoLst otherName
+     (errorOutput, _) <- capture $ alreadyExistsListError "home"
+     output `shouldBe` errorOutput
+     cleanUpDir
+    
     -- Dispatcher
     
     it "Dispatching help command" $ do
