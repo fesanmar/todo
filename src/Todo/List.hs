@@ -6,7 +6,6 @@ module Todo.List
     , nameFromPath
     , listExistsOnDir
     , notTodoListToShowMsg
-    , alreadyExistsListError
     ) where
 
 import System.Directory ( removeFile, renameFile, doesFileExist, listDirectory )
@@ -16,6 +15,7 @@ import System.FilePath
 import qualified Data.Text as T
 import Util.Console ( putErrorLn )
 import Control.Monad ( when )
+import Todo.List.Internal (alreadyExistsListError)
 
 todoExtension :: String
 todoExtension = ".todo"
@@ -27,13 +27,10 @@ new :: FilePath -> IO ()
 new fileName = do
     fileExist <- doesFileExist fileName
     if fileExist
-    then alreadyExistsListError fileName
+    then alreadyExistsListError $ nameFromPath fileName
     else do
         handle <- openFile fileName WriteMode
         hClose handle
-
-alreadyExistsListError :: FilePath -> IO ()
-alreadyExistsListError fileName = putErrorLn $ "Already exist a to-do list with the name " ++ "[" ++ fileName ++ "]"
 
 remove :: FilePath  -> IO ()
 remove = removeFile 

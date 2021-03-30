@@ -12,13 +12,13 @@ import Util.Console (putErrorLn)
 import Todo.Task
     ( append, prepend, view, complete, bump, dropTask )
 import Command.Dispatcher.Internal
-    ( accurateTodoFileError, notSuchCommandError, usage )
+    ( accurateTodoFileError, notSuchCommandError, usage, noSuchListError )
 
 type Command = String
 
 dispatch :: Config -> [String] -> IO ()
 dispatch config [] = usage
-dispatch config args@(command : other)
+dispatch config args@(command:other)
   | command `elem` ["help", "ls", "config", "dl"] = runGeneralCommand config args
 dispatch config (command : "-b" : fileName : args) = dispatch config (command : fileName : "-b" : args)
 dispatch config (command : fileName : args) = do
@@ -41,7 +41,7 @@ runGeneralCommand config ["dl", fileName] = do
   (_, fileExists) <- listExistsOnDir (path config) fileName
   if fileExists
     then dumpConfig $ newDefaultList fileName config
-    else putErrorLn $ fileName ++ " doesn't exists. You should creat it firs using <new> command"
+    else noSuchListError fileName
 runGeneralCommand _ (command:xs) = notSuchCommandError command
 
 -- |Runs commands not referred to a concrete to-do list.

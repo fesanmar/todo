@@ -9,6 +9,9 @@ accurateTodoFileError fileName = putErrorLn $ "There is no to-do list with the n
 notSuchCommandError :: String -> IO ()
 notSuchCommandError command = errorAndUsage $ "There is no " ++ "<" ++ command ++ "> command or it's arguments doesn't match.\nPlease check usage:\n"
 
+noSuchListError :: String -> IO ()
+noSuchListError fileName = putErrorLn $ fileName ++ " doesn't exists. You should creat it firs using <new> command"
+
 errorAndUsage :: String -> IO ()
 errorAndUsage msg = putErrorLn msg >> usage
 
