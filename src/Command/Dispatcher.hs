@@ -4,15 +4,16 @@ import App.Config
     ( newDefaultList,
       dumpConfig,
       configToList,
-      Config(defaultList, path) )
+      Config(defaultList, path), removeDefaultList, isDefaultList )
 import Control.Monad (when)
 import Todo.List
-    ( new, remove, rename, viewTodos, listExistsOnDir )
+    ( new, remove, rename, viewTodos, listExistsOnDir, nameFromPath )
 import Util.Console (putErrorLn)
 import Todo.Task
     ( append, prepend, view, complete, bump, dropTask )
 import Command.Dispatcher.Internal
     ( accurateTodoFileError, notSuchCommandError, usage, noSuchListError )
+import Data.Either ()
 
 type Command = String
 
@@ -26,7 +27,7 @@ dispatch config (command : fileName : args) = do
   let file = accurateTodoFile fileName (defaultList config)
   (todoFile, fileExists) <- listExistsOnDir (path config) file
   if fileExists || not fileExists && command == "new"
-    then runCommandOnList command $ todoFile : args
+    then runCommandOnList config command $ todoFile : args
     else accurateTodoFileError fileName
 dispatch todoDir (command:xs) = notSuchCommandError command
 
@@ -46,19 +47,40 @@ runGeneralCommand config ["dl", fileName] = do
 runGeneralCommand _ (command:xs) = notSuchCommandError command
 
 -- |Runs commands not referred to a concrete to-do list.
-runCommandOnList :: Command -> [String] -> IO ()
-runCommandOnList "new" [fileName] = new fileName
-runCommandOnList "remove" [fileName] = remove fileName
-runCommandOnList "rename" [fileName, newFileName] = rename fileName newFileName
-runCommandOnList "view" [fileName] = view fileName
-runCommandOnList "add" [fileName, "-b", todoItem] = prepend fileName todoItem
-runCommandOnList "add" [fileName, todoItem] = append fileName todoItem
-runCommandOnList "complete" args@[fileName, numberString] = complete args
-runCommandOnList "bump" [fileName, numberString] = bump fileName numberString Nothing
-runCommandOnList "bump" [fileName, numberString, stepsStr] = bump fileName numberString (Just stepsStr)
-runCommandOnList "drop" [fileName, numberString] = dropTask fileName numberString Nothing
-runCommandOnList "drop" [fileName, numberString, stepsStr] = dropTask fileName numberString (Just stepsStr)
-runCommandOnList command _ = notSuchCommandError command
+runCommandOnList :: Config -> Command -> [String] -> IO ()
+runCommandOnList config "new" [fileName] = new fileName
+runCommandOnList config "remove" [fileName] =
+  remove fileName
+    >>= whenRight (reconfigWhen config (isDefaultList' fileName) removeDefaultList)
+runCommandOnList config "rename" [fileName, newFileName] =
+  rename fileName newFileName
+    >>= whenRight (reconfigWhen config (isDefaultList' fileName) (newDefaultList newFileName))
+runCommandOnList config "view" [fileName] = view fileName
+runCommandOnList config "add" [fileName, "-b", todoItem] = prepend fileName todoItem
+runCommandOnList config "add" [fileName, todoItem] = append fileName todoItem
+runCommandOnList config "complete" args@[fileName, numberString] = complete args
+runCommandOnList config "bump" [fileName, numberString] = bump fileName numberString Nothing
+runCommandOnList config "bump" [fileName, numberString, stepsStr] = bump fileName numberString (Just stepsStr)
+runCommandOnList config "drop" [fileName, numberString] = dropTask fileName numberString Nothing
+runCommandOnList config "drop" [fileName, numberString, stepsStr] = dropTask fileName numberString (Just stepsStr)
+runCommandOnList config command _ = notSuchCommandError command
+
+-- |Runs and returns the IO Command if Either is right.
+whenRight :: IO () -> Either String () -> IO ()
+whenRight io (Right _) = io
+whenRight _ (Left _) = return ()
+
+{-|
+  Given a configuration, a predicate and a functions that operates
+  with the configuration, executes that function and make that change
+  persistent if the predicate evaluates to 'True'.
+-}
+reconfigWhen :: Config -> (Config -> Bool)  -> (Config -> Config )-> IO ()
+reconfigWhen cfg p f = when (p cfg) $ dumpConfig (f cfg)
+
+-- |Returns 'True' if the first argument is the default to-do list.
+isDefaultList' :: FilePath -> Config -> Bool 
+isDefaultList' file = isDefaultList (nameFromPath file)
 
 accurateTodoFile :: String -> Maybe String -> String
 accurateTodoFile "--" (Just file) = file

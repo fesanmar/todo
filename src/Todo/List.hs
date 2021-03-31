@@ -41,7 +41,7 @@ new fileName = do
   Removes a to-do list if exist. Otherwise, 'remove'
   does nothing.
 -}
-remove :: FilePath  -> IO ()
+remove :: FilePath  -> IO (Either String ())
 remove file = onFileExist file $ removeFile file
 
 {-|
@@ -51,7 +51,7 @@ remove file = onFileExist file $ removeFile file
   the wanted new name belongs to another list, 'rename' prints an
   error message.
 -}
-rename :: FilePath -> String -> IO ()
+rename :: FilePath -> String -> IO (Either String ())
 rename todoFile newName= onFileExist todoFile $ do
     let todoPath = takeDirectory todoFile
     let newTodoFile  = joinPath [todoPath, newName ++ todoExtension]

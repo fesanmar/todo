@@ -4,7 +4,9 @@ module App.Config
     , configToList
     , Config (path, configFilePath, defaultList)
     , dumpConfig
-    , newDefaultList ) where
+    , newDefaultList
+    , removeDefaultList
+    , isDefaultList ) where
 
 import System.FilePath ( joinPath )
 import Data.Maybe ( fromJust, isJust )
@@ -50,4 +52,11 @@ dumpConfig config = Str.writeFile (configFilePath config) (BUT.fromString $ show
 
 -- |Returns a 'Config' with a new to-do list as default.
 newDefaultList :: String -> Config -> Config
-newDefaultList newTodo (Config pth cf _)  = Config pth cf $ Just newTodo
+newDefaultList newTodo (Config pth cf _) = Config pth cf $ Just newTodo
+
+-- |Returns a 'Config' with no default to-do list.
+removeDefaultList :: Config -> Config
+removeDefaultList (Config pth cf _) = Config pth cf Nothing 
+
+isDefaultList :: String -> Config -> Bool 
+isDefaultList lst config = defaultList config == Just lst

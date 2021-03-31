@@ -224,3 +224,24 @@ specs = do
      newConfig <- loadTestConfig
      defaultList newConfig `shouldBe` Just "work"
      cleanUpDir
+    
+    it "Renaming the default to-do list" $ do
+     config <- loadTestConfig
+     dispatch config ["new", "work"]
+     dispatch config ["dl", "work"]
+     newConfig <- loadTestConfig
+     let newName = "job"
+     dispatch newConfig ["rename", "work", newName]
+     renamedDlConfig <- loadTestConfig
+     defaultList renamedDlConfig `shouldBe` Just newName
+     cleanUpDir
+    
+    it "Removing the default to-do list" $ do
+     config <- loadTestConfig
+     dispatch config ["new", "work"]
+     dispatch config ["dl", "work"]
+     newConfig <- loadTestConfig
+     dispatch newConfig ["remove", "work"]
+     removedDlConfig <- loadTestConfig
+     defaultList removedDlConfig `shouldBe` Nothing 
+     cleanUpDir
