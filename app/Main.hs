@@ -1,7 +1,7 @@
 module Main where
   
 import System.Directory ( getAppUserDataDirectory )
-import Config ( loadConfig )
+import App.Config ( loadConfig )
 import System.Directory.Internal.Prelude ( getArgs )
 import Command.Dispatcher ( dispatch )
 

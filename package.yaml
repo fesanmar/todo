@@ -57,3 +57,4 @@ tests:
     - todo
     - hspec
     - silently
+    - utf8-string

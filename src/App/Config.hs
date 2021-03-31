@@ -1,19 +1,18 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Config 
+module App.Config 
     ( loadConfig
     , configToList
     , Config (path, configFilePath, defaultList)
     , dumpConfig
     , newDefaultList ) where
 
-import System.Directory
-    ( createDirectoryIfMissing, doesDirectoryExist, doesFileExist )
 import System.FilePath ( joinPath )
 import Data.Maybe ( fromJust, isJust )
-import Data.Tuple.Extra ( both, second )
 import qualified Data.Text as T
 import qualified Data.ByteString as Str
 import qualified Data.ByteString.UTF8 as BUT
+import App.Config.Internal
+    ( createTodoDirIfMissing, iniContent, extractKVPairs )
 
 -- |Holds the app configuration data.
 data Config = Config { path :: FilePath
@@ -40,28 +39,6 @@ loadConfig basePath = do
     let configPairs = extractKVPairs ini
         defaultLst = lookup "defaultList" configPairs
     return $ Config appPath iniFilePath defaultLst 
-
-createTodoDirIfMissing :: FilePath -> IO FilePath
-createTodoDirIfMissing todoDir =
-  doesDirectoryExist todoDir
-  >>= \existsDir -> createDirectoryIfMissing existsDir todoDir
-  >> return todoDir
-
-iniContent :: FilePath -> IO Str.ByteString
-iniContent iniFile =
-  doesFileExist iniFile
-    >>= \exists ->
-      if exists
-        then Str.readFile iniFile
-        else return ""
-
-extractKVPairs :: Str.ByteString -> [(String, String)]
-extractKVPairs = createPairs . removeNoKeyValuePairs . removeSections . removeComments . textLines . BUT.toString
-  where textLines = map T.pack . lines
-        removeComments = filter (not . T.isPrefixOf ";")
-        removeSections = filter (not . T.isPrefixOf "[")
-        removeNoKeyValuePairs = filter ("=" `T.isInfixOf`)
-        createPairs = map (both (T.unpack . T.strip) . second (T.drop 1) . T.break (== '='))
 
 -- |Returns the configuration in the form of a list of strings with the format key=value
 configToList :: Config -> [String]

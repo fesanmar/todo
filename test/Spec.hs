@@ -1,6 +1,8 @@
 import Test.Hspec        (Spec, it, shouldBe, runIO)
 import Test.Hspec.Runner (configFastFail, defaultConfig, hspecWith)
-import Config
+import qualified Data.ByteString.UTF8 as BUT
+import App.Config
+import App.Config.Internal
 
 import Todo.List
 import Todo.List.Internal
@@ -40,6 +42,11 @@ specs :: Spec
 specs = do
     
     -- Config
+    it "Fetching key value pairs form ini file content" $
+     let content = "; comment\n[Section]\nmyKey=value\n;commentLike=keyValue\nnothing, ignore me.\n"
+         keyValuePairs = extractKVPairs $ BUT.fromString content in
+     keyValuePairs `shouldBe` [("myKey","value")]
+
     it "Loading config creates .todo dir inside base path" $ do
      config <- configAndCleanUpDir
      path config `shouldBe` basePath 

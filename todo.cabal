@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 24ea70b6e04d93d5df62739e098c0d5db2def6b2badd93b67995954ec36088c1
+-- hash: 02d9d2f52fa5e4494ae11abb73fb86d878beb62627dceeec74e98085ac09472f
 
 name:           todo
 version:        0.1.0
@@ -27,9 +27,10 @@ source-repository head
 
 library
   exposed-modules:
+      App.Config
+      App.Config.Internal
       Command.Dispatcher
       Command.Dispatcher.Internal
-      Config
       Todo.FileHandling
       Todo.List
       Todo.List.Internal
@@ -81,4 +82,5 @@ test-suite todo-test
     , hspec
     , silently
     , todo
+    , utf8-string
   default-language: Haskell2010

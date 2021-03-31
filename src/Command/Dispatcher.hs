@@ -1,6 +1,6 @@
 module Command.Dispatcher ( dispatch ) where
 
-import Config
+import App.Config
     ( newDefaultList,
       dumpConfig,
       configToList,
