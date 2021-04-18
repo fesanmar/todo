@@ -3,26 +3,18 @@ module Todo.List
     , remove
     , rename
     , viewTodos
-    , nameFromPath
     , listExistsOnDir
     , notTodoListToShowMsg
     ) where
 
-import System.Directory ( removeFile, renameFile, doesFileExist, listDirectory )
-import System.IO ( hClose, hPutStr, openTempFile, openFile, IOMode (WriteMode) )
-import System.FilePath
-    ( joinPath, isExtensionOf, takeDirectory, takeFileName )
-import qualified Data.Text as T
-import Control.Monad ( when )
-import Util.Console ( putErrorLn )
-import Todo.List.Internal (alreadyExistsListError)
-import Todo.FileHandling (onFileExist)
-
-todoExtension :: String
-todoExtension = ".todo"
-
-extensionLen :: Int
-extensionLen = length todoExtension
+import System.Directory
+    ( doesFileExist, listDirectory, removeFile, renameFile ) 
+import System.IO ( hClose, openFile, IOMode(WriteMode) ) 
+import System.FilePath ( joinPath, isExtensionOf, takeDirectory )
+import Control.Monad ( when ) 
+import Todo.List.Internal ( alreadyExistsListError )
+import Todo.FileHandling
+    ( onFileExist, nameFromPath, todoExtension )
 
 {-|
   Creates a new to-do list if not exist. Otherwise, 
@@ -76,9 +68,6 @@ listExistsOnDir todoDir fileName =
   let todoFile = todoFilePath todoDir fileName
    in doesFileExist todoFile
       >>= \fileExists -> return (todoFile, fileExists)
-
-nameFromPath :: FilePath -> String
-nameFromPath fileName = T.unpack . T.dropEnd extensionLen $ T.pack $ takeFileName fileName
 
 todoFilePath :: FilePath -> FilePath -> FilePath
 todoFilePath todoDir fileName = joinPath [todoDir, fileName ++ todoExtension]

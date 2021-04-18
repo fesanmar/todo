@@ -5,15 +5,16 @@ import App.Config
       dumpConfig,
       configToList,
       Config(defaultList, path), removeDefaultList, isDefaultList )
-import Control.Monad (when)
+import Control.Monad ( when, guard, void )
 import Todo.List
-    ( new, remove, rename, viewTodos, listExistsOnDir, nameFromPath )
-import Util.Console (putErrorLn)
+    ( new, remove, rename, viewTodos, listExistsOnDir )
 import Todo.Task
     ( append, prepend, view, complete, bump, dropTask )
+import Todo.FileHandling ( nameFromPath )
+import Util.Console (putErrorLn)
 import Command.Dispatcher.Internal
     ( accurateTodoFileError, notSuchCommandError, usage, noSuchListError )
-import Data.Either ()
+import Data.Either (fromRight)
 
 type Command = String
 
@@ -57,7 +58,7 @@ runCommandOnList config "rename" [fileName, newFileName] =
     >>= whenRight (reconfigWhen config (isDefaultList' fileName) (newDefaultList newFileName))
 runCommandOnList config "view" [fileName] = view fileName
 runCommandOnList config "add" [fileName, "-b", todoItem] = prepend fileName todoItem
-runCommandOnList config "add" [fileName, todoItem] = append fileName todoItem
+runCommandOnList config "add" [fileName, todoItem] = void (append fileName todoItem)
 runCommandOnList config "complete" args@[fileName, numberString] = complete args
 runCommandOnList config "bump" [fileName, numberString] = bump fileName numberString Nothing
 runCommandOnList config "bump" [fileName, numberString, stepsStr] = bump fileName numberString (Just stepsStr)
@@ -79,7 +80,7 @@ reconfigWhen :: Config -> (Config -> Bool)  -> (Config -> Config )-> IO ()
 reconfigWhen cfg p f = when (p cfg) $ dumpConfig (f cfg)
 
 -- |Returns 'True' if the first argument is the default to-do list.
-isDefaultList' :: FilePath -> Config -> Bool 
+isDefaultList' :: FilePath -> Config -> Bool
 isDefaultList' file = isDefaultList (nameFromPath file)
 
 accurateTodoFile :: String -> Maybe String -> String

@@ -9,9 +9,10 @@ module Todo.Task
 where
 
 import qualified Data.List as L
+import Data.Either
 import Data.Maybe ( fromJust, isJust )
 import qualified Data.Text as T
-import Todo.List ( nameFromPath )
+import Todo.FileHandling ( nameFromPath, onFileExist )
 import Todo.Transaction
     ( NumberString,
       TodoTask,
@@ -22,9 +23,15 @@ import Todo.Transaction
       replaceFileContent,
       scroll,
       Direction(Down, Up) )
+import App.Messages ( emptyTaskMsg )
 
-append :: FilePath -> String -> IO ()
-append fileName todoItem = appendFile fileName $ todoItem ++ "\n"
+append :: FilePath -> String -> IO (Either String ())
+append = onValidTask appendFile
+
+onValidTask :: (FilePath -> String -> IO ()) -> FilePath -> String -> IO (Either String ())
+onValidTask func file t 
+  | T.null . T.strip . T.pack $ t = return $ Left emptyTaskMsg
+  | otherwise = onFileExist file . func file $ t ++ "\n"
 
 prepend :: FilePath -> String -> IO ()
 prepend fileName todoItem =

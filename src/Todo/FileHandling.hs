@@ -1,7 +1,18 @@
 module Todo.FileHandling where
 
-import System.Directory (doesFileExist)
-import App.Messages (noSuchTodoList)
+import qualified Data.Text as T
+import System.Directory ( doesFileExist )
+import App.Messages ( noSuchTodoList )
+import System.FilePath ( takeFileName )
+
+todoExtension :: String
+todoExtension = ".todo"
+
+extensionLen :: Int
+extensionLen = length todoExtension
+
+nameFromPath :: FilePath -> String
+nameFromPath fileName = T.unpack . T.dropEnd extensionLen $ T.pack $ takeFileName fileName
 
 onFileExist :: FilePath -> IO () -> IO (Either String ())
 onFileExist file io =
