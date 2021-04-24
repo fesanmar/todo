@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: c933a6d9209c3b77ca75f06ea82d6497e309e8685b576cea5b8e3763ae294c21
+-- hash: 0f1a89579c5254ddd7aa247d457a038404b3516b5af0922eadf3c01e98d6f173
 
 name:           todo
 version:        0.1.0
@@ -72,6 +72,11 @@ test-suite todo-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      App.ConfigSpec
+      Command.DispatcherSpec
+      TestFixtures
+      Todo.ListSpec
+      Todo.TaskSpec
       Paths_todo
   hs-source-dirs:
       test
@@ -81,6 +86,7 @@ test-suite todo-test
     , directory
     , filepath
     , hspec
+    , hspec-discover
     , silently
     , todo
     , utf8-string
