@@ -327,7 +327,7 @@ specs = do
      output `shouldBe` outputError
      cleanUpDir
     
-    it "Dispatching add empty task into an existing list" $ do
+    it "Dispatching add only space task into an existing list" $ do
      config <- loadTestConfig
      let todoLst = "work"
          spacedTask = "  "
@@ -347,4 +347,54 @@ specs = do
      capture $ dispatch config ["add", todoLst, secondTask]
      insertedTasks <- readFile $ joinPath [path config, todoLst ++ todoExtension]
      insertedTasks `shouldBe` firstTask ++ "\n" ++ secondTask ++ "\n"
+     cleanUpDir
+    
+    it "Dispatching add -b task into a not existing list" $ do
+     config <- loadTestConfig
+     let notExistingLst = "work"
+     (output, _) <- capture $ dispatch config ["add", "-b", notExistingLst, "Some task"]
+     (error, _) <- capture $ noSuchListError notExistingLst
+     output `shouldBe` error
+     cleanUpDir
+    
+    it "Dispatching add -b task into an existing list" $ do
+     config <- loadTestConfig
+     let todoLst = "work"
+         task = "Some task"
+     dispatch config ["new", todoLst]
+     (output, _) <- capture $ dispatch config ["add", "-b",todoLst, task]
+     insertedTask <- readFile $ joinPath [path config, todoLst ++ todoExtension]
+     (output, insertedTask) `shouldBe` ("", task ++ "\n")
+     cleanUpDir
+    
+    it "Dispatching add -b empty task into an existing list" $ do
+     config <- loadTestConfig
+     let todoLst = "work"
+         emptyTask = ""
+     dispatch config ["new", todoLst]
+     (output, _) <- capture $ dispatch config ["add", "-b",todoLst, emptyTask]
+     (outputError, _) <- capture emptyTaskError
+     output `shouldBe` outputError
+     cleanUpDir
+    
+    it "Dispatching add -b only space task into an existing list" $ do
+     config <- loadTestConfig
+     let todoLst = "work"
+         spacedTask = "  "
+     dispatch config ["new", todoLst]
+     (output, _) <- capture $ dispatch config ["add", "-b", todoLst, spacedTask]
+     (outputError, _) <- capture emptyTaskError
+     output `shouldBe` outputError
+     cleanUpDir
+    
+    it "Dispatching add -b task twice into an existing list" $ do
+     config <- loadTestConfig
+     let todoLst = "work"
+         firstTask = "First task"
+         secondTask = "Second task"
+     dispatch config ["new", todoLst]
+     capture $ dispatch config ["add", "-b", todoLst, firstTask]
+     capture $ dispatch config ["add", "-b", todoLst, secondTask]
+     insertedTasks <- readFile $ joinPath [path config, todoLst ++ todoExtension]
+     insertedTasks `shouldBe` secondTask ++ "\n" ++ firstTask ++ "\n"
      cleanUpDir

@@ -33,11 +33,12 @@ onValidTask func file t
   | T.null . T.strip . T.pack $ t = return $ Left emptyTaskMsg
   | otherwise = onFileExist file . func file $ t ++ "\n"
 
-prepend :: FilePath -> String -> IO ()
-prepend fileName todoItem =
-  append fileName todoItem
-    >> lastIndex fileName
-    >>= \index -> bump fileName (show index) Nothing
+prepend :: FilePath -> String -> IO (Either String ())
+prepend = onValidTask appendAndBump
+  where appendAndBump fileName todoItem = do
+          appendFile fileName todoItem 
+          index <- lastIndex fileName 
+          bump fileName (show index) Nothing
 
 view :: String -> IO ()
 view fileName = do

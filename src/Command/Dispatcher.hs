@@ -57,7 +57,7 @@ runCommandOnList config "rename" [fileName, newFileName] =
   rename fileName newFileName
     >>= whenRight (reconfigWhen config (isDefaultList' fileName) (newDefaultList newFileName))
 runCommandOnList config "view" [fileName] = view fileName
-runCommandOnList config "add" [fileName, "-b", todoItem] = prepend fileName todoItem
+runCommandOnList config "add" [fileName, "-b", todoItem] = prepend fileName todoItem >>= putErrorWhenWrong 
 runCommandOnList config "add" [fileName, todoItem] = append fileName todoItem >>= putErrorWhenWrong 
 runCommandOnList config "complete" args@[fileName, numberString] = complete args
 runCommandOnList config "bump" [fileName, numberString] = bump fileName numberString Nothing
