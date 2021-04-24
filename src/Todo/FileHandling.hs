@@ -1,9 +1,14 @@
-module Todo.FileHandling where
+module Todo.FileHandling (
+                         onFileExist
+                         , nameFromPath
+                         , todoExtension
+                         , listExistsOnDir
+                         ) where
 
 import qualified Data.Text as T
 import System.Directory ( doesFileExist )
 import App.Messages ( noSuchTodoList )
-import System.FilePath ( takeFileName )
+import System.FilePath ( takeFileName, joinPath )
 
 todoExtension :: String
 todoExtension = ".todo"
@@ -21,3 +26,13 @@ onFileExist file io =
       if exist
         then io >> return (Right ())
         else return . Left $ noSuchTodoList file
+
+listExistsOnDir :: FilePath -> FilePath -> IO (FilePath, Bool)
+listExistsOnDir todoDir "" = return ("", False)
+listExistsOnDir todoDir fileName =
+  let todoFile = todoFilePath todoDir fileName
+   in doesFileExist todoFile
+      >>= \fileExists -> return (todoFile, fileExists)
+
+todoFilePath :: FilePath -> FilePath -> FilePath
+todoFilePath todoDir fileName = joinPath [todoDir, fileName ++ todoExtension]

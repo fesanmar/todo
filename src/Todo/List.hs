@@ -3,7 +3,6 @@ module Todo.List
     , remove
     , rename
     , viewTodos
-    , listExistsOnDir
     , notTodoListToShowMsg
     ) where
 
@@ -61,13 +60,3 @@ viewTodos todoDir = do
 
 notTodoListToShowMsg :: IO ()
 notTodoListToShowMsg = putStrLn "Not to-do list to show yet. Create one using <new> command."
-
-listExistsOnDir :: FilePath -> FilePath -> IO (FilePath, Bool)
-listExistsOnDir todoDir "" = return ("", False)
-listExistsOnDir todoDir fileName =
-  let todoFile = todoFilePath todoDir fileName
-   in doesFileExist todoFile
-      >>= \fileExists -> return (todoFile, fileExists)
-
-todoFilePath :: FilePath -> FilePath -> FilePath
-todoFilePath todoDir fileName = joinPath [todoDir, fileName ++ todoExtension]

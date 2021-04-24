@@ -1,17 +1,20 @@
 module Command.Dispatcher.Internal where
 
-import Util.Console (putErrorLn)
-import App.Messages (noSuchTodoList)
+import Util.Console ( putErrorLn )
+import App.Messages ( noSuchTodoList, emptyTaskMsg )
 
 accurateTodoFileError :: String -> IO ()
 accurateTodoFileError "--" = errorAndUsage "There is no to-do list setted as default. Use <dl> to accomplish it." 
-accurateTodoFileError fileName = putErrorLn $  noSuchTodoList fileName
+accurateTodoFileError fileName = noSuchListError fileName
 
 notSuchCommandError :: String -> IO ()
 notSuchCommandError command = errorAndUsage $ "There is no " ++ "<" ++ command ++ "> command or it's arguments doesn't match.\nPlease check usage:\n"
 
 noSuchListError :: String -> IO ()
-noSuchListError fileName = putErrorLn $ fileName ++ " doesn't exists. You should creat it firs using <new> command"
+noSuchListError fileName = putErrorLn $ noSuchTodoList fileName
+
+emptyTaskError :: IO ()
+emptyTaskError = putErrorLn emptyTaskMsg  
 
 errorAndUsage :: String -> IO ()
 errorAndUsage msg = putErrorLn msg >> usage

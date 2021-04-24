@@ -7,10 +7,10 @@ import App.Config
       Config(defaultList, path), removeDefaultList, isDefaultList )
 import Control.Monad ( when, guard, void )
 import Todo.List
-    ( new, remove, rename, viewTodos, listExistsOnDir )
+    ( new, remove, rename, viewTodos )
 import Todo.Task
     ( append, prepend, view, complete, bump, dropTask )
-import Todo.FileHandling ( nameFromPath )
+import Todo.FileHandling ( nameFromPath, listExistsOnDir )
 import Util.Console (putErrorLn)
 import Command.Dispatcher.Internal
     ( accurateTodoFileError, notSuchCommandError, usage, noSuchListError )
@@ -58,7 +58,7 @@ runCommandOnList config "rename" [fileName, newFileName] =
     >>= whenRight (reconfigWhen config (isDefaultList' fileName) (newDefaultList newFileName))
 runCommandOnList config "view" [fileName] = view fileName
 runCommandOnList config "add" [fileName, "-b", todoItem] = prepend fileName todoItem
-runCommandOnList config "add" [fileName, todoItem] = void (append fileName todoItem)
+runCommandOnList config "add" [fileName, todoItem] = append fileName todoItem >>= putErrorWhenWrong 
 runCommandOnList config "complete" args@[fileName, numberString] = complete args
 runCommandOnList config "bump" [fileName, numberString] = bump fileName numberString Nothing
 runCommandOnList config "bump" [fileName, numberString, stepsStr] = bump fileName numberString (Just stepsStr)
@@ -70,6 +70,10 @@ runCommandOnList config command _ = notSuchCommandError command
 whenRight :: IO () -> Either String () -> IO ()
 whenRight io (Right _) = io
 whenRight _ (Left _) = return ()
+
+putErrorWhenWrong :: Either String () -> IO ()
+putErrorWhenWrong (Right _) = return ()
+putErrorWhenWrong (Left msg) = putErrorLn msg
 
 {-|
   Given a configuration, a predicate and a functions that operates
