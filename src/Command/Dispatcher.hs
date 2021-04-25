@@ -56,7 +56,7 @@ runCommandOnList config "remove" [fileName] =
 runCommandOnList config "rename" [fileName, newFileName] =
   rename fileName newFileName
     >>= whenRight (reconfigWhen config (isDefaultList' fileName) (newDefaultList newFileName))
-runCommandOnList config "view" [fileName] = view fileName
+runCommandOnList config "view" [fileName] = view fileName >>= putAccurateOut
 runCommandOnList config "add" [fileName, "-b", todoItem] = prepend fileName todoItem >>= putErrorWhenWrong 
 runCommandOnList config "add" [fileName, todoItem] = append fileName todoItem >>= putErrorWhenWrong 
 runCommandOnList config "complete" args@[fileName, numberString] = complete args
@@ -74,6 +74,11 @@ whenRight _ (Left _) = return ()
 putErrorWhenWrong :: Either String () -> IO ()
 putErrorWhenWrong (Right _) = return ()
 putErrorWhenWrong (Left msg) = putErrorLn msg
+
+
+putAccurateOut :: Either String String -> IO ()
+putAccurateOut (Right msg) = putStrLn msg
+putAccurateOut (Left msg) = putErrorLn msg
 
 {-|
   Given a configuration, a predicate and a functions that operates

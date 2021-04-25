@@ -3,10 +3,12 @@ module Todo.TaskSpec where
 import Test.Hspec ( shouldBe, it, Spec, describe )
 import System.FilePath ( joinPath )
 import Data.Either ( isLeft, isRight )
+import System.IO.Silently ( capture )
 import TestFixtures ( loadTestConfig, cleanUpDir )
 import App.Config ( Config(path) )
 import Todo.List ( new )
-import Todo.Task ( append, prepend )
+import Todo.Task ( append, prepend, view )
+import Todo.Task.Internal ( emptyListMsg )
 
 spec :: Spec
 spec = do
@@ -107,4 +109,43 @@ spec = do
        new todoLst
        output <- prepend todoLst spacedTask
        isLeft output `shouldBe` True
+       cleanUpDir
+    
+    describe "view" $ do
+      
+      it "View a not existing list" $ do
+       config <- loadTestConfig
+       let inexistingTodoLst = joinPath [path config, "work.todo"]
+       output <- view inexistingTodoLst
+       isLeft output `shouldBe` True 
+       cleanUpDir
+      
+      it "View an existing empty list" $ do
+       config <- loadTestConfig
+       let todoLst = joinPath [path config, "work.todo"]
+       new todoLst
+       output <- view todoLst
+       output `shouldBe` Right (emptyListMsg todoLst)
+       cleanUpDir
+      
+      it "View an existing list with one task inside" $ do
+       config <- loadTestConfig
+       let todoLst = joinPath [path config, "work.todo"]
+           someTask = "Some task"
+       new todoLst
+       append todoLst someTask
+       output <- view todoLst
+       output `shouldBe` Right ("0 - " ++ someTask ++ "\n")
+       cleanUpDir
+      
+      it "View an existing list with more than one task inside" $ do
+       config <- loadTestConfig
+       let todoLst = joinPath [path config, "work.todo"]
+           someTask = "Some task"
+           otherTask = "Some other task"
+       new todoLst
+       append todoLst someTask
+       append todoLst otherTask
+       output <- view todoLst
+       output `shouldBe` Right ("0 - " ++ someTask ++ "\n" ++ "1 - " ++ otherTask ++ "\n")
        cleanUpDir

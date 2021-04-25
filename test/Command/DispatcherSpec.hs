@@ -6,13 +6,15 @@ import System.Directory ( doesFileExist )
 import System.IO.Silently ( capture )
 import TestFixtures
     ( loadTestConfig, cleanUpDir, configAndCleanUpDir )
+import Util.Console ( putErrorLn )
 import App.Config ( Config(defaultList, path) )
 import Todo.List ( new, notTodoListToShowMsg )
 import Todo.List.Internal ( alreadyExistsListError )
+import Todo.Task.Internal ( emptyTaskMsg )
 import Todo.FileHandling ( todoExtension )
 import Command.Dispatcher ( dispatch )
 import Command.Dispatcher.Internal
-    ( emptyTaskError, noSuchListError, notSuchCommandError, usage )
+    ( noSuchListError, notSuchCommandError, usage )
 
 spec :: Spec
 spec = do
@@ -154,7 +156,7 @@ spec = do
            emptyTask = ""
        dispatch config ["new", todoLst]
        (output, _) <- capture $ dispatch config ["add", todoLst, emptyTask]
-       (outputError, _) <- capture emptyTaskError
+       (outputError, _) <- capture $ putErrorLn emptyTaskMsg
        output `shouldBe` outputError
        cleanUpDir
       
@@ -164,7 +166,7 @@ spec = do
            spacedTask = "  "
        dispatch config ["new", todoLst]
        (output, _) <- capture $ dispatch config ["add", todoLst, spacedTask]
-       (outputError, _) <- capture emptyTaskError
+       (outputError, _) <- capture $ putErrorLn emptyTaskMsg
        output `shouldBe` outputError
        cleanUpDir
     
@@ -206,7 +208,7 @@ spec = do
            emptyTask = ""
        dispatch config ["new", todoLst]
        (output, _) <- capture $ dispatch config ["add", "-b",todoLst, emptyTask]
-       (outputError, _) <- capture emptyTaskError
+       (outputError, _) <- capture $ putErrorLn emptyTaskMsg
        output `shouldBe` outputError
        cleanUpDir
     
@@ -216,7 +218,7 @@ spec = do
            spacedTask = "  "
        dispatch config ["new", todoLst]
        (output, _) <- capture $ dispatch config ["add", "-b", todoLst, spacedTask]
-       (outputError, _) <- capture emptyTaskError
+       (outputError, _) <- capture $ putErrorLn emptyTaskMsg
        output `shouldBe` outputError
        cleanUpDir
     

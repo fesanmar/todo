@@ -19,12 +19,12 @@ extensionLen = length todoExtension
 nameFromPath :: FilePath -> String
 nameFromPath fileName = T.unpack . T.dropEnd extensionLen $ T.pack $ takeFileName fileName
 
-onFileExist :: FilePath -> IO () -> IO (Either String ())
+onFileExist :: FilePath -> IO a -> IO (Either String a)
 onFileExist file io =
   doesFileExist file
     >>= \exist ->
       if exist
-        then io >> return (Right ())
+        then io >>= \x -> return (Right x)
         else return . Left $ noSuchTodoList file
 
 listExistsOnDir :: FilePath -> FilePath -> IO (FilePath, Bool)

@@ -1,7 +1,7 @@
 module Command.Dispatcher.Internal where
 
 import Util.Console ( putErrorLn )
-import App.Messages ( noSuchTodoList, emptyTaskMsg )
+import App.Messages ( noSuchTodoList )
 
 accurateTodoFileError :: String -> IO ()
 accurateTodoFileError "--" = errorAndUsage "There is no to-do list setted as default. Use <dl> to accomplish it." 
@@ -12,9 +12,6 @@ notSuchCommandError command = errorAndUsage $ "There is no " ++ "<" ++ command +
 
 noSuchListError :: String -> IO ()
 noSuchListError fileName = putErrorLn $ noSuchTodoList fileName
-
-emptyTaskError :: IO ()
-emptyTaskError = putErrorLn emptyTaskMsg  
 
 errorAndUsage :: String -> IO ()
 errorAndUsage msg = putErrorLn msg >> usage

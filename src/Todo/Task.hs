@@ -23,15 +23,10 @@ import Todo.Transaction
       replaceFileContent,
       scroll,
       Direction(Down, Up) )
-import App.Messages ( emptyTaskMsg )
+import Todo.Task.Internal ( emptyListMsg, emptyTaskMsg )
 
 append :: FilePath -> String -> IO (Either String ())
 append = onValidTask appendFile
-
-onValidTask :: (FilePath -> String -> IO ()) -> FilePath -> String -> IO (Either String ())
-onValidTask func file t 
-  | T.null . T.strip . T.pack $ t = return $ Left emptyTaskMsg
-  | otherwise = onFileExist file . func file $ t ++ "\n"
 
 prepend :: FilePath -> String -> IO (Either String ())
 prepend = onValidTask appendAndBump
@@ -40,18 +35,26 @@ prepend = onValidTask appendAndBump
           index <- lastIndex fileName 
           bump fileName (show index) Nothing
 
-view :: String -> IO ()
-view fileName = do
+onValidTask :: (FilePath -> String -> IO ()) -> FilePath -> String -> IO (Either String ())
+onValidTask func file t 
+  | T.null . T.strip . T.pack $ t = return $ Left emptyTaskMsg
+  | otherwise = onFileExist file . func file $ t ++ "\n"
+
+{-|
+  Returns an error message if the file passed as an argument does not exist.
+  Otherwise, it returns a numbered task chain or an empty list message if 
+  the file contains no tasks.
+-}
+view :: FilePath -> IO (Either String String)
+view fileName = onFileExist fileName $ do
   todoTasks <- getTodoItems fileName
   let isEmpty = null todoTasks || all (T.null . T.strip . T.pack) todoTasks
   if isEmpty
-    then putStrLn $ nameFromPath fileName ++ " is empty."
-    else printListedTask todoTasks
+    then return $ emptyListMsg fileName
+    else return $ numberedTask todoTasks
 
-printListedTask :: [TodoTask] -> IO ()
-printListedTask todoTasks =
-  let numberedTasks = zipWith (\n task -> show n ++ " - " ++ task) [0 ..] todoTasks
-   in mapM_ putStrLn numberedTasks
+numberedTask :: [TodoTask] -> String
+numberedTask = unlines . zipWith (\n task -> show n ++ " - " ++ task) [0 ..]
 
 complete :: [String] -> IO ()
 complete [fileName, numberString] = do
