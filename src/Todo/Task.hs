@@ -25,9 +25,17 @@ import Todo.Transaction
       Direction(Down, Up) )
 import Todo.Task.Internal ( emptyListMsg, emptyTaskMsg )
 
+{-|
+  Insert a task at the end of the file passed as an argument. If the file does
+  not exist, it will return an error message wrapped in a 'Left'
+-}
 append :: FilePath -> String -> IO (Either String ())
 append = onValidTask appendFile
 
+{-|
+  Insert a task at the beginning of the file passed as an argument. If the file
+  does not exist, it will return an error message wrapped in a 'Left'
+-}
 prepend :: FilePath -> String -> IO (Either String ())
 prepend = onValidTask appendAndBump
   where appendAndBump fileName todoItem = do
