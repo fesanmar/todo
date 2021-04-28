@@ -75,7 +75,7 @@ putErrorWhenWrong :: Either String () -> IO ()
 putErrorWhenWrong (Right _) = return ()
 putErrorWhenWrong (Left msg) = putErrorLn msg
 
-
+-- |Prints an error line if 'Either' is 'Left' and a normal line if is 'Right'.
 putAccurateOut :: Either String String -> IO ()
 putAccurateOut (Right msg) = putStrLn msg
 putAccurateOut (Left msg) = putErrorLn msg

@@ -27,23 +27,23 @@ import Todo.Task.Internal ( emptyListMsg, emptyTaskMsg )
 
 {-|
   Insert a task at the end of the file passed as an argument. If the file does
-  not exist, it will return an error message wrapped in a 'Left'
+  not exist, it will return an error message wrapped in a 'Left'.
 -}
-append :: FilePath -> String -> IO (Either String ())
+append :: FilePath -> TodoTask -> IO (Either String ())
 append = onValidTask appendFile
 
 {-|
   Insert a task at the beginning of the file passed as an argument. If the file
-  does not exist, it will return an error message wrapped in a 'Left'
+  does not exist, it will return an error message wrapped in a 'Left'.
 -}
-prepend :: FilePath -> String -> IO (Either String ())
+prepend :: FilePath -> TodoTask -> IO (Either String ())
 prepend = onValidTask appendAndBump
   where appendAndBump fileName todoItem = do
           appendFile fileName todoItem 
           index <- lastIndex fileName 
           bump fileName (show index) Nothing
 
-onValidTask :: (FilePath -> String -> IO ()) -> FilePath -> String -> IO (Either String ())
+onValidTask :: (FilePath -> TodoTask -> IO ()) -> FilePath -> TodoTask -> IO (Either String ())
 onValidTask func file t 
   | T.null . T.strip . T.pack $ t = return $ Left emptyTaskMsg
   | otherwise = onFileExist file . func file $ t ++ "\n"

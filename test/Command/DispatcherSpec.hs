@@ -10,7 +10,7 @@ import Util.Console ( putErrorLn )
 import App.Config ( Config(defaultList, path) )
 import Todo.List ( new, notTodoListToShowMsg )
 import Todo.List.Internal ( alreadyExistsListError )
-import Todo.Task.Internal ( emptyTaskMsg )
+import Todo.Task.Internal ( emptyTaskMsg, emptyListMsg )
 import Todo.FileHandling ( todoExtension )
 import Command.Dispatcher ( dispatch )
 import Command.Dispatcher.Internal
@@ -232,4 +232,45 @@ spec = do
        capture $ dispatch config ["add", "-b", todoLst, secondTask]
        insertedTasks <- readFile $ joinPath [path config, todoLst ++ todoExtension]
        insertedTasks `shouldBe` secondTask ++ "\n" ++ firstTask ++ "\n"
+       cleanUpDir
+
+    describe "dispatch view" $ do
+      
+      it "Dispatching view with a not existing list" $ do
+       config <- loadTestConfig
+       let todoLst = "work"
+       (ouput, _) <- capture $ dispatch config ["view", todoLst]
+       (errorMsg, _) <- capture $ noSuchListError todoLst
+       ouput `shouldBe` errorMsg
+       cleanUpDir
+      
+      it "Dispatching view with an existing empty list" $ do
+       config <- loadTestConfig
+       let todoLst = "work"
+       dispatch config ["new", todoLst]
+       (ouput, _) <- capture $ dispatch config ["view", todoLst]
+       (emptyLstMsg, _) <- capture . putStrLn . emptyListMsg $ joinPath [path config, todoLst ++ ".todo"]
+       ouput `shouldBe` emptyLstMsg
+       cleanUpDir
+
+      it "Dispatching view with a singleton list" $ do
+       config <- loadTestConfig
+       let todoLst = "work"
+           task = "Some task"
+       dispatch config ["new", todoLst]
+       dispatch config ["add", todoLst, task]
+       (ouput, _) <- capture $ dispatch config ["view", todoLst]
+       ouput `shouldBe` "0 - " ++ task ++ "\n\n"
+       cleanUpDir
+      
+      it "Dispatching view with two task" $ do
+       config <- loadTestConfig
+       let todoLst = "work"
+           firstTask = "First task"
+           secondTask = "Second task"
+       dispatch config ["new", todoLst]
+       dispatch config ["add", todoLst, firstTask]
+       dispatch config ["add", todoLst, secondTask]
+       (ouput, _) <- capture $ dispatch config ["view", todoLst]
+       ouput `shouldBe` "0 - " ++ firstTask ++ "\n" ++ "1 - " ++ secondTask ++ "\n\n"
        cleanUpDir
