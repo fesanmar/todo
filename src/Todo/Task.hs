@@ -11,8 +11,9 @@ where
 import qualified Data.List as L
 import Data.Either ()
 import Data.Maybe ( fromJust, isJust )
+import Data.Functor ( (<&>) )
 import qualified Data.Text as T
-import Todo.FileHandling ( nameFromPath, onFileExist )
+import Todo.FileHandling ( onFileExist, onFileExistEither ) 
 import Todo.Transaction
     ( NumberString,
       TodoTask,
@@ -23,7 +24,8 @@ import Todo.Transaction
       replaceFileContent,
       scroll,
       Direction(Down, Up) )
-import Todo.Task.Internal ( emptyListMsg, emptyTaskMsg )
+import Todo.Task.Internal
+    ( emptyListMsg, emptyTaskMsg, outOfBoundErrorMsg, taskCompletedMsg )
 
 {-|
   Insert a task at the end of the file passed as an argument. If the file does
@@ -64,13 +66,25 @@ view fileName = onFileExist fileName $ do
 numberedTask :: [TodoTask] -> String
 numberedTask = unlines . zipWith (\n task -> show n ++ " - " ++ task) [0 ..]
 
-complete :: [String] -> IO ()
-complete [fileName, numberString] = do
+{-|
+  Deletes the task in the 'NumberString' position from the 'FilePath'
+  to-do list. Yields a successful message if the file exists an the 
+  position is not out of bound. Otherwise, yields the accurate error
+  message.
+-}
+complete :: FilePath -> NumberString -> IO (Either String String)
+complete fileName numberString = onFileExistEither fileName $ do
   items <- getTodoItems fileName
-  let itemToDelete = getItem numberString items
-  if isJust itemToDelete
-    then replaceFileContent fileName (unlines $ L.delete (fromJust itemToDelete) items)
-    else outOfBoundError numberString
+  let removeTaskInFile task tasksLst =
+        replaceFileContent fileName (unlines $ L.delete task tasksLst)
+          >> return (taskCompletedMsg task)
+  onTaskExist numberString items removeTaskInFile
+
+onTaskExist :: Show a => NumberString -> [TodoTask] -> (TodoTask -> [TodoTask] -> IO a) -> IO (Either String a)
+onTaskExist numberString items io
+  | isJust task = io (fromJust task) items <&> Right
+  | otherwise = return $ Left $ outOfBoundErrorMsg numberString
+  where task = getItem numberString items
 
 bump :: FilePath -> NumberString -> Maybe NumberString -> IO ()
 bump fileName = scroll fileName Up

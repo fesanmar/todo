@@ -59,7 +59,7 @@ runCommandOnList config "rename" [fileName, newFileName] =
 runCommandOnList config "view" [fileName] = view fileName >>= putAccurateOut
 runCommandOnList config "add" [fileName, "-b", todoItem] = prepend fileName todoItem >>= putErrorWhenWrong 
 runCommandOnList config "add" [fileName, todoItem] = append fileName todoItem >>= putErrorWhenWrong 
-runCommandOnList config "complete" args@[fileName, numberString] = complete args
+runCommandOnList config "complete" args@[fileName, numberString] = complete fileName numberString >>= putAccurateOut
 runCommandOnList config "bump" [fileName, numberString] = bump fileName numberString Nothing
 runCommandOnList config "bump" [fileName, numberString, stepsStr] = bump fileName numberString (Just stepsStr)
 runCommandOnList config "drop" [fileName, numberString] = dropTask fileName numberString Nothing

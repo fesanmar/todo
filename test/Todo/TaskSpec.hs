@@ -7,8 +7,9 @@ import System.IO.Silently ( capture )
 import TestFixtures ( loadTestConfig, cleanUpDir )
 import App.Config ( Config(path) )
 import Todo.List ( new )
-import Todo.Task ( append, prepend, view )
-import Todo.Task.Internal ( emptyListMsg )
+import Todo.FileHandling.Internal
+import Todo.Task ( append, prepend, view, complete )
+import Todo.Task.Internal
 
 spec :: Spec
 spec = do
@@ -148,4 +149,63 @@ spec = do
        append todoLst otherTask
        output <- view todoLst
        output `shouldBe` Right ("0 - " ++ someTask ++ "\n" ++ "1 - " ++ otherTask ++ "\n")
+       cleanUpDir
+
+    describe "complete" $ do
+      
+      it "Completing from a not existing list" $ do
+       config <- loadTestConfig
+       let lstName = "work"
+           todoLst = joinPath [path config, lstName ++ ".todo"]
+           taskPosition = "Some task"
+       output <- complete todoLst taskPosition
+       output `shouldBe` Left (noSuchTodoList lstName)
+       cleanUpDir
+      
+      it "Completing from an existing empty list" $ do
+       config <- loadTestConfig
+       let lstName = "work"
+           todoLst = joinPath [path config, lstName ++ ".todo"]
+           taskPosition = "0"
+       new todoLst
+       output <- complete todoLst taskPosition
+       output `shouldBe` Left (outOfBoundErrorMsg taskPosition)
+       cleanUpDir
+      
+      it "Completing an out of bound task from an singleton list" $ do
+       config <- loadTestConfig
+       let lstName = "work"
+           todoLst = joinPath [path config, lstName ++ ".todo"]
+           someTask = "Some task"
+           taskPosition = "1"
+       new todoLst
+       append todoLst someTask
+       output <- complete todoLst taskPosition
+       output `shouldBe` Left (outOfBoundErrorMsg taskPosition)
+       cleanUpDir
+      
+      it "Completing a task from an singleton list" $ do
+       config <- loadTestConfig
+       let lstName = "work"
+           todoLst = joinPath [path config, lstName ++ ".todo"]
+           someTask = "Some task"
+           taskPosition = "0"
+       new todoLst
+       append todoLst someTask
+       output <- complete todoLst taskPosition
+       output `shouldBe` Right (taskCompletedMsg someTask)
+       cleanUpDir
+      
+      it "Completing a task from an binary list" $ do
+       config <- loadTestConfig
+       let lstName = "work"
+           todoLst = joinPath [path config, lstName ++ ".todo"]
+           someTask = "Some task"
+           otherTask = "Other task"
+           taskPosition = "1"
+       new todoLst
+       append todoLst someTask
+       append todoLst otherTask
+       output <- complete todoLst taskPosition
+       output `shouldBe` Right (taskCompletedMsg otherTask)
        cleanUpDir
