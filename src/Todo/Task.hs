@@ -44,6 +44,7 @@ prepend = onValidTask appendAndBump
           appendFile fileName todoItem 
           index <- lastIndex fileName 
           bump fileName (show index) Nothing
+          return ()
 
 onValidTask :: (FilePath -> TodoTask -> IO ()) -> FilePath -> TodoTask -> IO (Either String ())
 onValidTask func file t 
@@ -86,8 +87,18 @@ onTaskExist numberString items io
   | otherwise = return $ Left $ outOfBoundErrorMsg numberString
   where task = getItem numberString items
 
-bump :: FilePath -> NumberString -> Maybe NumberString -> IO ()
-bump fileName = scroll fileName Up
+{-|
+  Bumps a task 'n' positions or up to the top of the list if 'n' is 'Nothing'.
+-}
+bump :: FilePath -> NumberString -> Maybe NumberString -> IO (Either String String)
+bump fileName indexStr maybeSteps = onFileExistEither fileName $ do 
+  scroll fileName Up indexStr maybeSteps
+  return $ Right ""
 
-dropTask :: FilePath -> NumberString -> Maybe NumberString -> IO ()
-dropTask fileName = scroll fileName Down
+{-|
+  Drop a task 'n' positions or down to the bottom of the list if 'n' is 'Nothing'.
+-}
+dropTask :: FilePath -> NumberString -> Maybe NumberString -> IO (Either  String String)
+dropTask fileName indexStr maybeSteps = onFileExistEither fileName $ do 
+  scroll fileName Down indexStr maybeSteps
+  return $ Right ""

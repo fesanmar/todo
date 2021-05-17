@@ -26,10 +26,8 @@ dispatch config args@(command:other)
 dispatch config (command : "-b" : fileName : args) = dispatch config (command : fileName : "-b" : args)
 dispatch config (command : fileName : args) = do
   let file = accurateTodoFile fileName (defaultList config)
-  (todoFile, fileExists) <- listExistsOnDir (path config) file
-  if fileExists || not fileExists && command == "new"
-    then runCommandOnList config command $ todoFile : args
-    else accurateTodoFileError fileName
+  (todoFile, _) <- listExistsOnDir (path config) file
+  runCommandOnList config command $ todoFile : args
 dispatch todoDir (command:xs) = notSuchCommandError command
 
 -- |Runs commands not referred to a concrete to-do list or a configuration command.
@@ -60,10 +58,10 @@ runCommandOnList config "view" [fileName] = view fileName >>= putAccurateOut
 runCommandOnList config "add" [fileName, "-b", todoItem] = prepend fileName todoItem >>= putErrorWhenWrong 
 runCommandOnList config "add" [fileName, todoItem] = append fileName todoItem >>= putErrorWhenWrong 
 runCommandOnList config "complete" args@[fileName, numberString] = complete fileName numberString >>= putAccurateOut
-runCommandOnList config "bump" [fileName, numberString] = bump fileName numberString Nothing
-runCommandOnList config "bump" [fileName, numberString, stepsStr] = bump fileName numberString (Just stepsStr)
-runCommandOnList config "drop" [fileName, numberString] = dropTask fileName numberString Nothing
-runCommandOnList config "drop" [fileName, numberString, stepsStr] = dropTask fileName numberString (Just stepsStr)
+runCommandOnList config "bump" [fileName, numberString] = bump fileName numberString Nothing >>= putAccurateOut
+runCommandOnList config "bump" [fileName, numberString, stepsStr] = bump fileName numberString (Just stepsStr) >>= putAccurateOut
+runCommandOnList config "drop" [fileName, numberString] = dropTask fileName numberString Nothing >>= putAccurateOut
+runCommandOnList config "drop" [fileName, numberString, stepsStr] = dropTask fileName numberString (Just stepsStr) >>= putAccurateOut
 runCommandOnList config command _ = notSuchCommandError command
 
 -- |Runs and returns the IO Command if Either is right.
@@ -77,6 +75,8 @@ putErrorWhenWrong (Left msg) = putErrorLn msg
 
 -- |Prints an error line if 'Either' is 'Left' and a normal line if is 'Right'.
 putAccurateOut :: Either String String -> IO ()
+putAccurateOut (Right "") = return ()
+putAccurateOut (Left "") = return ()
 putAccurateOut (Right msg) = putStrLn msg
 putAccurateOut (Left msg) = putErrorLn msg
 
