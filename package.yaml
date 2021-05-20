@@ -59,3 +59,4 @@ tests:
     - hspec-discover
     - silently
     - utf8-string
+    - bytestring

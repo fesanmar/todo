@@ -14,3 +14,6 @@ outOfBoundErrorMsg numberString = show numberString ++ " is out of bound or is n
 
 taskCompletedMsg :: TodoTask -> String
 taskCompletedMsg = (++) "Completed: "
+
+taskMovedMsg :: TodoTask -> FilePath -> String
+taskMovedMsg task to = task ++ " moved to " ++ nameFromPath to

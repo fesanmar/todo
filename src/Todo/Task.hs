@@ -5,6 +5,7 @@ module Todo.Task
   , complete
   , bump
   , dropTask
+  , mv
   )
 where
 
@@ -20,19 +21,23 @@ import Todo.Transaction
       outOfBoundError,
       lastIndex,
       getTodoItems,
+      getTodoItems',
       getItem,
       replaceFileContent,
       scroll,
       Direction(Down, Up) )
 import Todo.Task.Internal
-    ( emptyListMsg, emptyTaskMsg, outOfBoundErrorMsg, taskCompletedMsg )
+    ( emptyListMsg, emptyTaskMsg, outOfBoundErrorMsg, taskCompletedMsg, taskMovedMsg )
 
 {-|
   Insert a task at the end of the file passed as an argument. If the file does
   not exist, it will return an error message wrapped in a 'Left'.
 -}
 append :: FilePath -> TodoTask -> IO (Either String ())
-append = onValidTask appendFile
+append = onValidTask append'
+
+append' :: FilePath -> TodoTask -> IO ()
+append' = appendFile
 
 {-|
   Insert a task at the beginning of the file passed as an argument. If the file
@@ -102,3 +107,17 @@ dropTask :: FilePath -> NumberString -> Maybe NumberString -> IO (Either  String
 dropTask fileName indexStr maybeSteps = onFileExistEither fileName $ do 
   scroll fileName Down indexStr maybeSteps
   return $ Right ""
+
+{-|
+  Moves a task from a list to another if both files exist and 'NumberString'
+  contains a valid index.
+-}
+mv :: FilePath -> NumberString -> FilePath -> IO (Either  String String)
+mv from indexStr to = do
+  onFileExistEither from $ do 
+    onFileExistEither to $ do
+      items <- getTodoItems' from
+      let mv' itm itms = append to itm
+                          >> complete from indexStr 
+                          >> return (taskMovedMsg itm to)
+      onTaskExist indexStr items mv'

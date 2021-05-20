@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1ff5c40924ac093616c96398d9581195f2b6a976b93f12ee7f10984f267ca041
+-- hash: 58bf428d322ebf1dca56be38564adf170c928b8fc049423f14970cd6038ca63c
 
 name:           todo
 version:        0.1.0
@@ -85,6 +85,7 @@ test-suite todo-test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , bytestring
     , directory
     , filepath
     , hspec

@@ -1,6 +1,7 @@
 module Todo.Transaction
     ( lastIndex
     , getTodoItems
+    , getTodoItems'
     , getItem
     , replaceFileContent
     , outOfBoundError
@@ -11,6 +12,8 @@ module Todo.Transaction
 where
 
 import qualified Data.List as L
+import qualified Data.ByteString as S
+import qualified Data.ByteString.UTF8 as BUT
 import Data.Char ( isDigit )
 import Data.Maybe (isJust, fromJust)
 import System.FilePath ( takeDirectory )
@@ -66,10 +69,17 @@ bracketOnItemExists fileName numberString ioError fSuccess = do
        in replaceFileContent fileName $ fromJust fSuccess items itemToOp
     else ioError
 
+-- |Fetch a list of items from a to-do list.
 getTodoItems :: FilePath -> IO [TodoTask]
 getTodoItems fileName = do
   contents <- readFile fileName
   return $ lines contents
+
+-- |same as 'getTodoItems' but without lazy read fiel behavior.
+getTodoItems' :: FilePath -> IO [TodoTask]
+getTodoItems' fileName = do
+  contents <- S.readFile fileName
+  return $ lines $ BUT.toString contents
 
 getItem :: NumberString -> [TodoTask] -> Maybe TodoTask
 getItem "" _ = Nothing

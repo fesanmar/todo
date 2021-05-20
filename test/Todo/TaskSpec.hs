@@ -1,15 +1,22 @@
+{-# LANGUAGE OverloadedStrings #-}
 module Todo.TaskSpec where
 
 import Test.Hspec ( shouldBe, it, Spec, describe )
 import System.FilePath ( joinPath )
 import Data.Either ( isLeft, isRight )
+import qualified Data.ByteString as S
+import qualified Data.ByteString.UTF8 as BUT
 import System.IO.Silently ( capture )
 import TestFixtures ( loadTestConfig, cleanUpDir )
 import App.Config ( Config(path) )
 import Todo.List ( new )
-import Todo.FileHandling.Internal
-import Todo.Task ( append, prepend, view, complete )
+import Todo.FileHandling.Internal ( noSuchTodoList )
+import Todo.Task ( append, prepend, view, complete, mv )
 import Todo.Task.Internal
+    ( taskMovedMsg,
+      taskCompletedMsg,
+      outOfBoundErrorMsg,
+      emptyListMsg )
 
 spec :: Spec
 spec = do
@@ -157,7 +164,7 @@ spec = do
        config <- loadTestConfig
        let lstName = "work"
            todoLst = joinPath [path config, lstName ++ ".todo"]
-           taskPosition = "Some task"
+           taskPosition = "0"
        output <- complete todoLst taskPosition
        output `shouldBe` Left (noSuchTodoList lstName)
        cleanUpDir
@@ -208,4 +215,75 @@ spec = do
        append todoLst otherTask
        output <- complete todoLst taskPosition
        output `shouldBe` Right (taskCompletedMsg otherTask)
+       cleanUpDir
+    
+    describe "mv" $ do
+      
+      it "Moving a task from a not existing list to a not existinig list" $ do
+       config <- loadTestConfig
+       let lstFromName = "work"
+           lstToName = "job"
+           todoLstFrom = joinPath [path config, lstFromName ++ ".todo"]
+           todoLstTo = joinPath [path config, lstToName ++ ".todo"]
+           taskPosition = "0"
+       output <- mv todoLstFrom taskPosition todoLstTo
+       output `shouldBe` Left (noSuchTodoList lstFromName)
+       cleanUpDir
+      
+      it "Moving a task from an existing list to a not existinig list" $ do
+       config <- loadTestConfig
+       let lstFromName = "work"
+           lstToName = "job"
+           todoLstFrom = joinPath [path config, lstFromName ++ ".todo"]
+           todoLstTo = joinPath [path config, lstToName ++ ".todo"]
+           taskPosition = "0"
+       new todoLstFrom
+       output <- mv todoLstFrom taskPosition todoLstTo
+       output `shouldBe` Left (noSuchTodoList lstToName)
+       cleanUpDir
+      
+      it "Moving an out of bound task from a list to another" $ do
+       config <- loadTestConfig
+       let lstFromName = "work"
+           lstToName = "job"
+           todoLstFrom = joinPath [path config, lstFromName ++ ".todo"]
+           todoLstTo = joinPath [path config, lstToName ++ ".todo"]
+           taskPosition = "0"
+       new todoLstFrom
+       new todoLstTo
+       output <- mv todoLstFrom taskPosition todoLstTo
+       output `shouldBe` Left (outOfBoundErrorMsg taskPosition)
+       cleanUpDir
+      
+      it "Moving a task from a list to another" $ do
+       config <- loadTestConfig
+       let lstFromName = "work2"
+           lstToName = "job2"
+           todoLstFrom = joinPath [path config, lstFromName ++ ".todo"]
+           todoLstTo = joinPath [path config, lstToName ++ ".todo"]
+           task = "Some task"
+           taskPosition = "0"
+       new todoLstFrom
+       append todoLstFrom task
+       new todoLstTo
+       output <- mv todoLstFrom taskPosition todoLstTo
+       lstToTask <- S.readFile todoLstTo
+       lstFromTask <- S.readFile todoLstFrom
+       (output, lstToTask, lstFromTask) `shouldBe` 
+                (Right $ taskMovedMsg (task ++ "\r") todoLstTo, BUT.fromString $ task ++ "\r\r\n", "")
+       cleanUpDir
+      
+      it "Moving a task with a wrong index" $ do
+       config <- loadTestConfig
+       let lstFromName = "work3"
+           lstToName = "job3"
+           todoLstFrom = joinPath [path config, lstFromName ++ ".todo"]
+           todoLstTo = joinPath [path config, lstToName ++ ".todo"]
+           task = "Some task"
+           taskPosition = "not an index"
+       new todoLstFrom
+       append todoLstFrom task
+       new todoLstTo
+       output <- mv todoLstFrom taskPosition todoLstTo
+       output `shouldBe` Left (outOfBoundErrorMsg taskPosition)
        cleanUpDir
