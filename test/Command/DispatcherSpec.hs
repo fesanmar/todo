@@ -5,7 +5,11 @@ import System.FilePath ( joinPath )
 import System.Directory ( doesFileExist )
 import System.IO.Silently ( capture )
 import TestFixtures
-    ( loadTestConfig, cleanUpDir, configAndCleanUpDir )
+    ( cleanUpDir,
+      configAndCleanUpDir,
+      loadTestConfig,
+      outOfBoundError,
+      taskMoved )
 import Util.Console ( putErrorLn )
 import App.Config ( Config(defaultList, path) )
 import Todo.List ( new, notTodoListToShowMsg )
@@ -14,7 +18,6 @@ import Todo.Task.Internal ( emptyTaskMsg, emptyListMsg )
 import Todo.FileHandling ( todoExtension )
 import Command.Dispatcher ( dispatch )
 import Command.Dispatcher.Internal
-    ( noSuchListError, notSuchCommandError, usage )
 
 spec :: Spec
 spec = do
@@ -273,4 +276,68 @@ spec = do
        dispatch config ["add", todoLst, secondTask]
        (ouput, _) <- capture $ dispatch config ["view", todoLst]
        ouput `shouldBe` "0 - " ++ firstTask ++ "\n" ++ "1 - " ++ secondTask ++ "\n\n"
+       cleanUpDir
+    
+    describe "dispatch mv" $ do
+
+      it "Dispatching mv from and to not existing list" $ do
+       config <- loadTestConfig
+       let notExistingLstFrom = "work"
+           notExistingLstTo = "job"
+       (output, _) <- capture $ dispatch config ["mv", notExistingLstFrom, "0", notExistingLstTo]
+       (error, _) <- capture $ noSuchListError notExistingLstFrom
+       output `shouldBe` error
+       cleanUpDir
+      
+      it "Dispatching mv from an existing list to a not existing list" $ do
+       config <- loadTestConfig
+       let listFrom = "work"
+           notExistingLstTo = "job"
+           taskToMove = "Some task"
+       dispatch config ["new", listFrom]
+       dispatch config ["add", listFrom, taskToMove]
+       (output, _) <- capture $ dispatch config ["mv", listFrom, "0", notExistingLstTo]
+       (error, _) <- capture $ noSuchListError notExistingLstTo
+       output `shouldBe` error
+       cleanUpDir
+      
+      it "Dispatching mv with a dummy task index" $ do
+       config <- loadTestConfig
+       let listFrom = "work"
+           listTo = "job"
+           taskToMove = "Some task"
+           dummyTaskIndex = "wawa"
+       dispatch config ["new", listFrom]
+       dispatch config ["new", listTo]
+       dispatch config ["add", listFrom, taskToMove]
+       (output, _) <- capture $ dispatch config ["mv", listFrom, dummyTaskIndex, listTo]
+       (error, _) <- capture $ outOfBoundError dummyTaskIndex
+       output `shouldBe` error
+       cleanUpDir
+      
+      it "Dispatching mv with a out of bound index" $ do
+       config <- loadTestConfig
+       let listFrom = "work"
+           listTo = "job"
+           taskToMove = "Some task"
+           dummyTaskIndex = "1"
+       dispatch config ["new", listFrom]
+       dispatch config ["new", listTo]
+       dispatch config ["add", listFrom, taskToMove]
+       (output, _) <- capture $ dispatch config ["mv", listFrom, dummyTaskIndex, listTo]
+       (error, _) <- capture $ outOfBoundError dummyTaskIndex
+       output `shouldBe` error
+       cleanUpDir
+
+      it "Dispatching mv happy path" $ do
+       config <- loadTestConfig
+       let listFrom = "work"
+           listTo = "job"
+           taskToMove = "Some task"
+           taskIndex = "0"
+       dispatch config ["new", listFrom]
+       dispatch config ["new", listTo]
+       dispatch config ["add", listFrom, taskToMove]
+       (output, _) <- capture $ dispatch config ["mv", listFrom, taskIndex, listTo]
+       output `shouldBe` ""
        cleanUpDir

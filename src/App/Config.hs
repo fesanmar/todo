@@ -20,10 +20,14 @@ import App.Config.Internal
 data Config = Config { path :: FilePath
                      , configFilePath :: FilePath
                      , defaultList :: Maybe String
+                     , verbose :: Bool
                      } deriving ( Eq )
 
 instance Show Config where
-  show config = if isJust defaultTodo then "defaultList=" ++ fromJust defaultTodo ++ "\n" else ""
+  show config = 
+      if isJust defaultTodo 
+          then "defaultList=" ++ fromJust defaultTodo ++ "\n" 
+          else ""
     where defaultTodo = defaultList config
 
 configFilename :: FilePath
@@ -40,7 +44,7 @@ loadConfig basePath = do
     ini <- iniContent iniFilePath
     let configPairs = extractKVPairs ini
         defaultLst = lookup "defaultList" configPairs
-    return $ Config appPath iniFilePath defaultLst 
+    return $ Config appPath iniFilePath defaultLst False
 
 -- |Returns the configuration in the form of a list of strings with the format key=value
 configToList :: Config -> [String]
@@ -52,11 +56,11 @@ dumpConfig config = Str.writeFile (configFilePath config) (BUT.fromString $ show
 
 -- |Returns a 'Config' with a new to-do list as default.
 newDefaultList :: String -> Config -> Config
-newDefaultList newTodo (Config pth cf _) = Config pth cf $ Just newTodo
+newDefaultList newTodo config = config {defaultList = Just newTodo} 
 
 -- |Returns a 'Config' with no default to-do list.
 removeDefaultList :: Config -> Config
-removeDefaultList (Config pth cf _) = Config pth cf Nothing 
+removeDefaultList config = config { defaultList = Nothing }
 
 isDefaultList :: String -> Config -> Bool 
 isDefaultList lst config = defaultList config == Just lst

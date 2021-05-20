@@ -9,11 +9,11 @@ import Control.Monad ( when, guard, void )
 import Todo.List
     ( new, remove, rename, viewTodos )
 import Todo.Task
-    ( append, prepend, view, complete, bump, dropTask )
-import Todo.FileHandling ( nameFromPath, listExistsOnDir )
+    ( append, prepend, view, complete, bump, dropTask, mv )
+import Todo.FileHandling ( listExistsOnDir, nameFromPath )
 import Util.Console (putErrorLn)
 import Command.Dispatcher.Internal
-    ( accurateTodoFileError, notSuchCommandError, usage, noSuchListError )
+    ( noSuchListError, notSuchCommandError, usage, todoFile )
 import Data.Either (fromRight)
 
 type Command = String
@@ -24,10 +24,13 @@ dispatch config [] = usage
 dispatch config args@(command:other)
   | command `elem` ["help", "ls", "config", "dl"] = runGeneralCommand config args
 dispatch config (command : "-b" : fileName : args) = dispatch config (command : fileName : "-b" : args)
+dispatch config ["mv", fromLst, numberString, toLst] = do
+  fromFile <- todoFile config fromLst
+  toFile   <- todoFile config toLst
+  runCommandOnList config "mv" [fromFile, numberString, toFile]
 dispatch config (command : fileName : args) = do
-  let file = accurateTodoFile fileName (defaultList config)
-  (todoFile, _) <- listExistsOnDir (path config) file
-  runCommandOnList config command $ todoFile : args
+  todoFile' <- todoFile config fileName
+  runCommandOnList config command $ todoFile' : args
 dispatch todoDir (command:xs) = notSuchCommandError command
 
 -- |Runs commands not referred to a concrete to-do list or a configuration command.
@@ -62,6 +65,7 @@ runCommandOnList config "bump" [fileName, numberString] = bump fileName numberSt
 runCommandOnList config "bump" [fileName, numberString, stepsStr] = bump fileName numberString (Just stepsStr) >>= putAccurateOut
 runCommandOnList config "drop" [fileName, numberString] = dropTask fileName numberString Nothing >>= putAccurateOut
 runCommandOnList config "drop" [fileName, numberString, stepsStr] = dropTask fileName numberString (Just stepsStr) >>= putAccurateOut
+runCommandOnList config "mv" [fileFrom, numberString, fileTo] = mv fileFrom numberString fileTo >>= putErrorWhenWrong
 runCommandOnList config command _ = notSuchCommandError command
 
 -- |Runs and returns the IO Command if Either is right.
@@ -69,7 +73,7 @@ whenRight :: IO () -> Either String () -> IO ()
 whenRight io (Right _) = io
 whenRight _ (Left _) = return ()
 
-putErrorWhenWrong :: Either String () -> IO ()
+putErrorWhenWrong :: Either String r -> IO ()
 putErrorWhenWrong (Right _) = return ()
 putErrorWhenWrong (Left msg) = putErrorLn msg
 
@@ -91,8 +95,3 @@ reconfigWhen cfg p f = when (p cfg) $ dumpConfig (f cfg)
 -- |Returns 'True' if the first argument is the default to-do list.
 isDefaultList' :: FilePath -> Config -> Bool
 isDefaultList' file = isDefaultList (nameFromPath file)
-
-accurateTodoFile :: String -> Maybe String -> String
-accurateTodoFile "--" (Just file) = file
-accurateTodoFile "--" Nothing = ""
-accurateTodoFile file _ = file

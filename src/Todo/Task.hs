@@ -112,7 +112,7 @@ dropTask fileName indexStr maybeSteps = onFileExistEither fileName $ do
   Moves a task from a list to another if both files exist and 'NumberString'
   contains a valid index.
 -}
-mv :: FilePath -> NumberString -> FilePath -> IO (Either  String String)
+mv :: FilePath -> NumberString -> FilePath -> IO (Either String String)
 mv from indexStr to = do
   onFileExistEither from $ do 
     onFileExistEither to $ do

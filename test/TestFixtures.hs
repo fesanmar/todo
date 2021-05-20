@@ -3,6 +3,9 @@ module TestFixtures where
 import App.Config ( loadConfig, Config )
 import System.FilePath ( joinPath )
 import System.Directory ( removePathForcibly )
+import Todo.Task.Internal ( outOfBoundErrorMsg, taskMovedMsg )
+import Util.Console ( putErrorLn )
+import Todo.Transaction ( TodoTask )
 
 baseDirName :: FilePath
 baseDirName = joinPath [".", "test", "res"]
@@ -24,3 +27,9 @@ configAndCleanUpDir = do
     config <- loadConfig basePath 
     cleanUpDir
     return config
+
+outOfBoundError :: String -> IO ()
+outOfBoundError = putErrorLn . outOfBoundErrorMsg
+
+taskMoved :: TodoTask -> FilePath  -> IO ()
+taskMoved t = putStrLn . taskMovedMsg t 
