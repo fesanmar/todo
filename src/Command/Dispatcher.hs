@@ -1,5 +1,8 @@
 module Command.Dispatcher ( dispatch ) where
 
+import Paths_todo (version)
+import Data.Version (showVersion)
+
 import App.Config
     ( newDefaultList,
       dumpConfig,
@@ -21,6 +24,7 @@ type Command = String
 -- |Dispatch a command with the passed configuration and arguments.
 dispatch :: Config -> [String] -> IO ()
 dispatch config [] = usage
+dispatch config ["--version"] = putStrLn $ showVersion version
 dispatch config args@(command:other)
   | command `elem` ["help", "ls", "config", "dl"] = runGeneralCommand config args
 dispatch config (command : "-b" : fileName : args) = dispatch config (command : fileName : "-b" : args)
