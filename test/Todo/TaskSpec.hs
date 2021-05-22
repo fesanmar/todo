@@ -7,7 +7,7 @@ import Data.Either ( isLeft, isRight )
 import qualified Data.ByteString as S
 import qualified Data.ByteString.UTF8 as BUT
 import System.IO.Silently ( capture )
-import TestFixtures ( loadTestConfig, cleanUpDir )
+import TestFixtures ( loadTestConfig, cleanUpDir, cleanOutput )
 import App.Config ( Config(path) )
 import Todo.List ( new )
 import Todo.FileHandling.Internal ( noSuchTodoList )
@@ -269,8 +269,10 @@ spec = do
        output <- mv todoLstFrom taskPosition todoLstTo
        lstToTask <- S.readFile todoLstTo
        lstFromTask <- S.readFile todoLstFrom
-       (output, lstToTask, lstFromTask) `shouldBe` 
-                (Right $ taskMovedMsg (task ++ "\r") todoLstTo, BUT.fromString $ task ++ "\r\r\n", "")
+       let cleanedOutput = cleanOutput <$> output
+           cleanedLstToTask = cleanOutput $ BUT.toString lstToTask
+       (cleanedOutput, cleanedLstToTask, lstFromTask) `shouldBe` 
+                (Right $ taskMovedMsg task todoLstTo, task ++ "\n", "")
        cleanUpDir
       
       it "Moving a task with a wrong index" $ do

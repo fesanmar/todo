@@ -59,7 +59,8 @@ spec = do
        new workLst
        new homeLst
        (output, _) <- capture $ dispatch config ["ls"]
-       output `shouldBe` "work\nhome\n"
+       let sameContent = output `elem` ["work\nhome\n", "home\nwork\n"]
+       sameContent `shouldBe` True
        cleanUpDir
     
     describe "dispatch new" $ do

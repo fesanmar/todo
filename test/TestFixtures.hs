@@ -1,5 +1,6 @@
 module TestFixtures where
 
+import Data.Char
 import App.Config ( loadConfig, Config )
 import System.FilePath ( joinPath )
 import System.Directory ( removePathForcibly )
@@ -23,8 +24,8 @@ loadTestConfig :: IO Config
 loadTestConfig = loadConfig basePath
 
 configAndCleanUpDir :: IO Config
-configAndCleanUpDir = do 
-    config <- loadConfig basePath 
+configAndCleanUpDir = do
+    config <- loadConfig basePath
     cleanUpDir
     return config
 
@@ -32,4 +33,7 @@ outOfBoundError :: String -> IO ()
 outOfBoundError = putErrorLn . outOfBoundErrorMsg
 
 taskMoved :: TodoTask -> FilePath  -> IO ()
-taskMoved t = putStrLn . taskMovedMsg t 
+taskMoved t = putStrLn . taskMovedMsg t
+
+cleanOutput :: String -> String
+cleanOutput = filter (/= '\r')
