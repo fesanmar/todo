@@ -72,10 +72,10 @@ runCommandOnList config "drop" [fileName, numberString, stepsStr] = dropTask fil
 runCommandOnList config "mv" [fileFrom, numberString, fileTo] = mv fileFrom numberString fileTo >>= putErrorWhenWrong
 runCommandOnList config command _ = notSuchCommandError command
 
--- |Runs and returns the IO Command if Either is right.
+-- |Runs and returns the IO Command if Either is right. Otherwise prints error inside 'Left'.
 whenRight :: IO () -> Either String () -> IO ()
 whenRight io (Right _) = io
-whenRight _ (Left _) = return ()
+whenRight _ (Left msg) = putErrorLn msg
 
 putErrorWhenWrong :: Either String r -> IO ()
 putErrorWhenWrong (Right _) = return ()

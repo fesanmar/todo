@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 55671b4ad7326ca4e012d70e92272120cf3782df2ba023e92de609a48059aa30
+-- hash: 6295e4bb7d080bea740e48e28d05080d07c44e282d48fd12772e2ef7909e92f7
 
 name:           todo
-version:        1.0.0
+version:        1.0.1
 description:    Please see the README on GitHub at <https://github.com/fesanmar/todo#readme>
 homepage:       https://github.com/fesanmar/todo#readme
 bug-reports:    https://github.com/fesanmar/todo/issues
